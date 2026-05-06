@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -10,68 +11,41 @@ import { Link } from 'expo-router';
 export default function HomeScreen() {
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}
       headerImage={
         <Image
           source={require('@/assets/images/recyclingbanner.png')}
-          style={styles.reactLogo}
+          style={styles.headerImage}
         />
-      }>
+      }
+    >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        <ThemedText type="title" style={styles.headerText}>News & Announcements</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+      <ThemedView style={[styles.card, styles.blueCard]}>
+        <Ionicons name="alert-circle" size={22} color="#FFFFFF" style={styles.icon} />
+        <ThemedText style={styles.cardText}>
+          This is a sample announcement message. The Civicvoice web dashboard will allow you to customize the message displayed here.
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+
+      <ThemedView style={[styles.card, styles.redCard]}>
+        <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.icon} />
+        <ThemedText style={styles.cardText}>
+          This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here.
+        </ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.divider} />
+
+      <ThemedView style={[styles.card, styles.blueCard]}>
+        <Image
+          source={require('@/assets/images/recyclingbanner.png')}
+          style={styles.cardImage}
+        />
+        <ThemedText style={styles.cardText}>
+          This section can display news and corresponding images from the web dashboard. The method determining exactly what news will be displayed at any given time is TBD
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
@@ -80,21 +54,57 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    paddingVertical: 10
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  headerText: {
+    fontSize: 28
   },
-  reactLogo: {
+
+  card: {
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12
+  },
+
+  blueCard: {
+    backgroundColor: '#456781'
+  },
+
+  redCard: {
+    backgroundColor: '#9D1416'
+  },
+
+  icon: {
+    marginBottom: 6,
+  },
+
+  cardText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: '#bbb',
+    marginVertical: 16,
+    width: '100%',
+    alignSelf: 'center'
+  },
+
+  cardImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+
+  headerImage: {
     height: 178,
     width: '100%',
     bottom: 0,
     left: 0,
     right: 0,
-    position: 'absolute',
-    alignSelf: 'center',
+    position: 'absolute'
   },
 });
