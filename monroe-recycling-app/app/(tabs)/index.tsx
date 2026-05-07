@@ -25,14 +25,14 @@ export default function HomeScreen() {
 
       <ThemedView style={[styles.card, styles.blueCard]}>
         <Ionicons name="alert-circle" size={22} color="#FFFFFF" style={styles.icon} />
-        <ThemedText style={styles.cardText}>
+        <ThemedText style={styles.cardText} lightColor="#FFFFFF">
           This is a sample announcement message. The Civicvoice web dashboard will allow you to customize the message displayed here.
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={[styles.card, styles.redCard]}>
         <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.icon} />
-        <ThemedText style={styles.cardText}>
+        <ThemedText style={styles.cardText} lightColor="#FFFFFF">
           This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here.
         </ThemedText>
       </ThemedView>
@@ -44,7 +44,7 @@ export default function HomeScreen() {
           source={require('@/assets/images/recyclingbanner.png')}
           style={styles.cardImage}
         />
-        <ThemedText style={styles.cardText}>
+        <ThemedText style={styles.cardText} lightColor="#FFFFFF">
           This section can display news and corresponding images from the web dashboard. The method determining exactly what news will be displayed at any given time is TBD
         </ThemedText>
       </ThemedView>

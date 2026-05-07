@@ -6,7 +6,11 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 
+import { Switch } from 'react-native';
+import { useThemeContext } from '@/contexts/theme-context';
+
 export default function Profile() {
+  const { theme, toggleTheme } = useThemeContext();
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -35,6 +39,15 @@ export default function Profile() {
         Content and features will be added here soon.
       </ThemedText>
 
+      <ThemedView style={styles.settingRow}>
+        <ThemedText>Dark Mode</ThemedText>
+
+        <Switch
+          value={theme === 'dark'}
+          onValueChange={toggleTheme}
+        />
+      </ThemedView>
+
     </ParallaxScrollView>
   );
 }
@@ -48,5 +61,11 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
+  },
+    settingRow: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

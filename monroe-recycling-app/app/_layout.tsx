@@ -9,13 +9,14 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import TopBar from '@/components/topbar';
+import { ThemeProviderCustom, useThemeContext } from '@/contexts/theme-context';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootLayoutInner() {
+  const { theme } = useThemeContext();
 
   const navigationState = useRootNavigationState();
 
@@ -25,21 +26,41 @@ export default function RootLayout() {
     const applyNavBarStyle = async () => {
       await NavigationBar.setPositionAsync('absolute');
       await NavigationBar.setBehaviorAsync('overlay-swipe');
-      await NavigationBar.setBackgroundColorAsync('#1B633B');
-      await NavigationBar.setButtonStyleAsync('light');
+      await NavigationBar.setBackgroundColorAsync(
+        theme === 'dark' ? '#000000' : '#1B633B'
+      );
+      await NavigationBar.setButtonStyleAsync(
+        theme === 'dark' ? 'light' : 'light'
+      );
     };
 
     applyNavBarStyle();
-  }, [navigationState?.key]);
+  }, [navigationState?.key, theme]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
       <TopBar title="Monroe County Recycling" />
+
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: 'modal', title: 'Modal' }}
+        />
       </Stack>
-      <StatusBar style="light"backgroundColor="#1B633B"/>
+
+      <StatusBar
+        style={theme === 'dark' ? 'light' : 'light'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#1B633B'}
+      />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProviderCustom>
+      <RootLayoutInner />
+    </ThemeProviderCustom>
   );
 }
