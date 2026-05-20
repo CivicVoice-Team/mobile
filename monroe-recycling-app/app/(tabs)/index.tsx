@@ -7,8 +7,36 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { fetchMobileContent } from '@/services/mobileContent'
+
+type MobileContentItem = {
+  field_id: string;
+  text: string;
+}
 
 export default function HomeScreen() {
+  const [mobileContent, setMobileContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function loadContent() {
+      // TEMP HARDCODED FOR NOW
+      const skill_id = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
+
+      const data: MobileContentItem[] = await fetchMobileContent(skill_id);
+
+      const mapped: Record<string, string> = {};
+
+      data.forEach((item) => {
+        mapped[item.field_id] = item.text;
+      });
+
+      setMobileContent(mapped);
+    }
+
+    loadContent();
+  }, [])
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}
@@ -26,14 +54,14 @@ export default function HomeScreen() {
       <ThemedView style={[styles.card, styles.blueCard]}>
         <Ionicons name="alert-circle" size={22} color="#FFFFFF" style={styles.icon} />
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          This is a sample announcement message. The Civicvoice web dashboard will allow you to customize the message displayed here.
+          {mobileContent.notice_box || "This is a sample announcement message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={[styles.card, styles.redCard]}>
         <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.icon} />
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here.
+          {mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
         </ThemedText>
       </ThemedView>
 
