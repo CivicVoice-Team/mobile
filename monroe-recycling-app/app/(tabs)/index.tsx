@@ -15,12 +15,24 @@ type MobileContentItem = {
   text: string;
 }
 
+type NewsItem = {
+  newsletter_id: string;
+  skill_id: string;
+  title: string;
+  description: string;
+  date: string;
+  title_es?: string
+  description_es?: string;
+  video_url?: string;
+};
+
 export default function HomeScreen() {
   const [mobileContent, setMobileContent] = useState<Record<string, string>>({});
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
 
   useEffect(() => {
     async function loadContent() {
-      // TEMP HARDCODED FOR NOW
+      // Mobile Content
       const skill_id = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
 
       const data: MobileContentItem[] = await fetchMobileContent(skill_id);
@@ -32,10 +44,52 @@ export default function HomeScreen() {
       });
 
       setMobileContent(mapped);
+
+      // News Content
+      try {
+        const rawNews = await fetchNews(skill_id);
+
+        const filteredNews = getLastYearNews(rawNews);
+
+        setNewsItems(filteredNews);
+      } catch (err) {
+        console.error("News fetch failed:", err);
+      }
     }
 
     loadContent();
   }, [])
+
+  async function fetchNews(skill_id: string): Promise<NewsItem[]> {
+    const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/news?skill_id=${skill_id}`;
+
+    const res = await fetch(url);
+
+    console.log("NEWS STATUS:", res.status);
+
+    if(!res.ok) {
+      const errText = await res.text();
+      console.log("ERROR BODY:", errText);
+      throw new Error(`Failed to fetch news: ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log("NEWS DATA:", data);
+
+    return data;
+  }
+
+  function getLastYearNews(items: NewsItem[]) {
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    return items.filter(item => {
+      if (!item.date) return false;
+      return new Date(item.date) >= oneYearAgo;
+    }).sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+  }
 
   return (
     <ParallaxScrollView
@@ -67,7 +121,22 @@ export default function HomeScreen() {
 
       <ThemedView style={styles.divider} />
 
-      <ThemedView style={[styles.card, styles.blueCard]}>
+      {newsItems.map((item) => (
+        <ThemedView
+          key={item.newsletter_id}
+          style={[styles.card, styles.blueCard]}
+        >
+          <ThemedText type="subtitle" style={{ fontWeight: "bold", marginBottom: 6 }} lightColor="#fff">
+            {item.title}
+          </ThemedText>
+
+          <ThemedText style={styles.cardText} lightColor="#fff">
+            {item.description}
+          </ThemedText>
+        </ThemedView>
+      ))}
+
+      {/* <ThemedView style={[styles.card, styles.blueCard]}>
         <Image
           source={require('@/assets/images/recyclingbanner.png')}
           style={styles.cardImage}
@@ -75,7 +144,7 @@ export default function HomeScreen() {
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
           This section can display news and corresponding images from the web dashboard. The method determining exactly what news will be displayed at any given time is TBD
         </ThemedText>
-      </ThemedView>
+      </ThemedView> */}
     </ParallaxScrollView>
   );
 }
