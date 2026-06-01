@@ -6,11 +6,11 @@ export async function fetchMobileContent(skill_id) {
             `${API_URL}?skill_id=${skill_id}`
         );
 
-        console.log("STATUS:", response.status);
+        //console.log("STATUS:", response.status);
 
         const responseText = await response.text();
 
-        console.log("RAW RESPONSE:", responseText);
+        //console.log("RAW RESPONSE:", responseText);
 
         if (!response.ok) {
             throw new Error(`Failed with status ${response.status}`);

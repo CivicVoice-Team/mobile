@@ -65,16 +65,16 @@ export default function HomeScreen() {
 
     const res = await fetch(url);
 
-    console.log("NEWS STATUS:", res.status);
+    //console.log("NEWS STATUS:", res.status);
 
     if(!res.ok) {
       const errText = await res.text();
-      console.log("ERROR BODY:", errText);
+      //console.log("ERROR BODY:", errText);
       throw new Error(`Failed to fetch news: ${res.status}`);
     }
 
     const data = await res.json();
-    console.log("NEWS DATA:", data);
+    //console.log("NEWS DATA:", data);
 
     return data;
   }
@@ -122,6 +122,20 @@ export default function HomeScreen() {
       <ThemedView style={styles.divider} />
 
       {newsItems.map((item) => (
+        <ThemedView key={item.newsletter_id} style={[styles.card, styles.blueCard]}>
+          <ThemedText type="subtitle" style={{ fontWeight: "bold", marginBottom: 10 }} lightColor='#fff'>
+            {item.title}
+          </ThemedText>
+
+          <Link href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date}}}>
+            <ThemedText style={{color: "fff", textDecorationLine: "underline"}}>
+              Read More
+            </ThemedText>
+          </Link>
+        </ThemedView>
+      ))}
+
+      {/* {newsItems.map((item) => (
         <ThemedView
           key={item.newsletter_id}
           style={[styles.card, styles.blueCard]}
@@ -134,17 +148,7 @@ export default function HomeScreen() {
             {item.description}
           </ThemedText>
         </ThemedView>
-      ))}
-
-      {/* <ThemedView style={[styles.card, styles.blueCard]}>
-        <Image
-          source={require('@/assets/images/recyclingbanner.png')}
-          style={styles.cardImage}
-        />
-        <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          This section can display news and corresponding images from the web dashboard. The method determining exactly what news will be displayed at any given time is TBD
-        </ThemedText>
-      </ThemedView> */}
+      ))} */}
     </ParallaxScrollView>
   );
 }
