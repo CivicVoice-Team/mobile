@@ -128,7 +128,7 @@ export default function HomeScreen() {
           </ThemedText>
 
           <Link href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date}}}>
-            <ThemedText style={{color: "fff", textDecorationLine: "underline"}}>
+            <ThemedText style={{color: "#fff", textDecorationLine: "underline"}}>
               Read More
             </ThemedText>
           </Link>
