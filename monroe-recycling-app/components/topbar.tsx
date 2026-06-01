@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#1B633B',
+        backgroundColor: '#152e70',
         zIndex: 1000,
     },
     inner: {

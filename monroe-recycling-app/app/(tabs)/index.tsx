@@ -121,34 +121,24 @@ export default function HomeScreen() {
 
       <ThemedView style={styles.divider} />
 
-      {newsItems.map((item) => (
-        <ThemedView key={item.newsletter_id} style={[styles.card, styles.blueCard]}>
-          <ThemedText type="subtitle" style={{ fontWeight: "bold", marginBottom: 10 }} lightColor='#fff'>
-            {item.title}
-          </ThemedText>
+      {newsItems.map((item) => {
+        const imageUrl = item.video_url?.[0];
 
-          <Link href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date}}}>
-            <ThemedText style={{color: "#fff", textDecorationLine: "underline"}}>
-              Read More
+        return (
+          <ThemedView key={item.newsletter_id} style={[styles.card, styles.blueCard]}>
+            {imageUrl ? (<Image source={{uri:imageUrl}} style={styles.newsImage} contentFit="cover"/>) : null}
+            <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>
+              {item.title}
             </ThemedText>
-          </Link>
-        </ThemedView>
-      ))}
+            <Link href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null}}}>
+              <ThemedText style={{color: "#fff", textDecorationLine: "underline"}}>
+                Read More
+              </ThemedText>
+            </Link>
+          </ThemedView>
+        );
+      })}
 
-      {/* {newsItems.map((item) => (
-        <ThemedView
-          key={item.newsletter_id}
-          style={[styles.card, styles.blueCard]}
-        >
-          <ThemedText type="subtitle" style={{ fontWeight: "bold", marginBottom: 6 }} lightColor="#fff">
-            {item.title}
-          </ThemedText>
-
-          <ThemedText style={styles.cardText} lightColor="#fff">
-            {item.description}
-          </ThemedText>
-        </ThemedView>
-      ))} */}
     </ParallaxScrollView>
   );
 }
@@ -208,4 +198,11 @@ const styles = StyleSheet.create({
     right: 0,
     position: 'absolute'
   },
+
+  newsImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 12,
+    marginBottom: 10
+  }
 });

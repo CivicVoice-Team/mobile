@@ -27,7 +27,7 @@ function RootLayoutInner() {
       await NavigationBar.setPositionAsync('absolute');
       await NavigationBar.setBehaviorAsync('overlay-swipe');
       await NavigationBar.setBackgroundColorAsync(
-        theme === 'dark' ? '#000000' : '#1B633B'
+        theme === 'dark' ? '#000000' : '#152e70'
       );
       await NavigationBar.setButtonStyleAsync(
         theme === 'dark' ? 'light' : 'light'
@@ -51,7 +51,7 @@ function RootLayoutInner() {
 
       <StatusBar
         style={theme === 'dark' ? 'light' : 'light'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#1B633B'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#152370'} //1B633B for green
       />
     </ThemeProvider>
   );

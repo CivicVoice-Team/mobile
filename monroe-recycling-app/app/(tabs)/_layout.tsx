@@ -21,7 +21,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: '#1B633B',
+          backgroundColor: '#152e70',
         },
       }}>
       <Tabs.Screen
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
 
   activeIconContainer: {
-    backgroundColor: '#1B633B',
+    backgroundColor: '#152e70',
     width: 52,
     height: 52,
     borderRadius: 26,
