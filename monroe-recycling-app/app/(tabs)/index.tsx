@@ -26,9 +26,17 @@ type NewsItem = {
   video_url?: string;
 };
 
+type NotificationItem = {
+  title: string;
+  description: string;
+  date: string;
+  state?: string;
+}
+
 export default function HomeScreen() {
   const [mobileContent, setMobileContent] = useState<Record<string, string>>({});
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [topNotification, setTopNotification] = useState("");
 
   useEffect(() => {
     async function loadContent() {
@@ -44,6 +52,19 @@ export default function HomeScreen() {
       });
 
       setMobileContent(mapped);
+
+      // Notification Content
+      try {
+        const notifications = await fetchNotifications(skill_id);
+
+        const latestNotification = notifications.filter((n) => n.state !== "INVALID").sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+
+        if (latestNotification?.description) {
+          setTopNotification(latestNotification.description);
+        }
+      } catch (err) {
+        console.error("Notification fetch failed:", err);
+      }
 
       // News Content
       try {
@@ -79,6 +100,19 @@ export default function HomeScreen() {
     return data;
   }
 
+  async function fetchNotifications(
+    skill_id: string
+  ): Promise<NotificationItem[]> {
+    const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/notifications?skill_id=${skill_id}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error( `Failed to fetch notifications: ${res.status}`);
+    }
+
+    return res.json();
+  }
+
   function getLastYearNews(items: NewsItem[]) {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -105,17 +139,17 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.headerText}>News & Announcements</ThemedText>
       </ThemedView>
 
-      <ThemedView style={[styles.card, styles.blueCard]}>
+      {/* <ThemedView style={[styles.card, styles.blueCard]}>
         <Ionicons name="alert-circle" size={22} color="#FFFFFF" style={styles.icon} />
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
           {mobileContent.notice_box || "This is a sample announcement message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
         </ThemedText>
-      </ThemedView>
+      </ThemedView> */}
 
       <ThemedView style={[styles.card, styles.redCard]}>
         <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.icon} />
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          {mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
+          {topNotification || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
         </ThemedText>
       </ThemedView>
 
