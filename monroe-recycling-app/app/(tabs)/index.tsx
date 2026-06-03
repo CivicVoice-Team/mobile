@@ -168,17 +168,17 @@ export default function HomeScreen() {
         const imageUrl = item.video_url?.[0];
 
         return (
-          <ThemedView key={item.newsletter_id} style={[styles.card, styles.blueCard]}>
-            {imageUrl ? (<Image source={{uri:imageUrl}} style={styles.newsImage} contentFit="cover"/>) : null}
-            <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>
-              {item.title}
-            </ThemedText>
-            <Link href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null}}}>
-              <ThemedText style={{color: "#fff", textDecorationLine: "underline"}}>
+          <Link key={item.newsletter_id} href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null}}}>
+            <ThemedView style={[styles.card, styles.blueCard]}>
+              {imageUrl ? (<Image source={{ uri: imageUrl}} style={styles.newsImage} contentFit='cover'/>) : null}
+              <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>
+                {item.title}
+              </ThemedText>
+              <ThemedText style={{color:"#fff", textDecorationLine: "underline"}}>
                 Read More
               </ThemedText>
-            </Link>
-          </ThemedView>
+            </ThemedView>
+          </Link>
         );
       })}
 
