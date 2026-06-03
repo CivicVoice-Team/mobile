@@ -130,8 +130,13 @@ export default function HomeScreen() {
       headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}
       headerImage={
         <Image
-          source={require('@/assets/images/recyclingbanner.png')}
+          source={
+            mobileContent.home_banner 
+            ? { uri: mobileContent.home_banner } 
+            : require('@/assets/images/partial-react-logo.png')
+          }
           style={styles.headerImage}
+          contentFit='cover'
         />
       }
     >
@@ -153,7 +158,11 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.divider} />
+      {/* <ThemedView style={styles.divider} /> */}
+
+      {/* <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title" style={styles.headerText}>News</ThemedText>
+      </ThemedView> */}
 
       {newsItems.map((item) => {
         const imageUrl = item.video_url?.[0];
@@ -183,7 +192,7 @@ const styles = StyleSheet.create({
   },
 
   headerText: {
-    fontSize: 28
+    fontSize: 18
   },
 
   card: {
