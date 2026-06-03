@@ -36,7 +36,7 @@ type NotificationItem = {
 export default function HomeScreen() {
   const [mobileContent, setMobileContent] = useState<Record<string, string>>({});
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [topNotification, setTopNotification] = useState("");
+  const [topNotification, setTopNotification] = useState<NotificationItem | null>(null);
 
   useEffect(() => {
     async function loadContent() {
@@ -59,8 +59,8 @@ export default function HomeScreen() {
 
         const latestNotification = notifications.filter((n) => n.state !== "INVALID").sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-        if (latestNotification?.description) {
-          setTopNotification(latestNotification.description);
+        if (latestNotification) {
+          setTopNotification(latestNotification);
         }
       } catch (err) {
         console.error("Notification fetch failed:", err);
@@ -153,8 +153,11 @@ export default function HomeScreen() {
 
       <ThemedView style={[styles.card, styles.redCard]}>
         <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.icon} />
+        {topNotification?.title ? (<ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 6}} lightColor="#FFFFFF">
+          {topNotification.title}
+        </ThemedText>) : null}
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          {topNotification || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
+          {topNotification?.description || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
         </ThemedText>
       </ThemedView>
 
