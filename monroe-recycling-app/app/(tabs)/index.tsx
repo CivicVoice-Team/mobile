@@ -57,10 +57,20 @@ export default function HomeScreen() {
       try {
         const notifications = await fetchNotifications(skill_id);
 
-        const latestNotification = notifications.filter((n) => n.state !== "INVALID").sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+        //const latestNotification = notifications.filter((n) => n.state !== "INVALID").sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-        if (latestNotification) {
-          setTopNotification(latestNotification);
+        const now = new Date();
+
+        const nextNotification = notifications.filter((n) => {
+          if (n.state === "INVALID") return false;
+          const notificationDate = new Date(n.date);
+          return notificationDate >= now;
+        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+
+
+
+        if (nextNotification) {
+          setTopNotification(nextNotification);
         }
       } catch (err) {
         console.error("Notification fetch failed:", err);
@@ -152,10 +162,12 @@ export default function HomeScreen() {
       </ThemedView> */}
 
       <ThemedView style={[styles.card, styles.redCard]}>
-        <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.icon} />
-        {topNotification?.title ? (<ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 6}} lightColor="#FFFFFF">
-          {topNotification.title}
-        </ThemedText>) : null}
+        <ThemedView style={styles.alertHeader}>
+          <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.alertIcon} />
+          {topNotification?.title ? (<ThemedText type="subtitle" style={styles.alertTitle} lightColor="#FFFFFF">
+            {topNotification.title}
+          </ThemedText>) : null}
+        </ThemedView>
         <ThemedText style={styles.cardText} lightColor="#FFFFFF">
           {topNotification?.description || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
         </ThemedText>
@@ -201,11 +213,14 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     padding: 12,
-    marginBottom: 12
+    marginBottom: 12,
+    width: '100%',
+    alignSelf: 'center'
   },
 
   blueCard: {
-    backgroundColor: '#456781'
+    backgroundColor: '#456781',
+    alignSelf: 'center'
   },
 
   redCard: {
@@ -250,5 +265,22 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 12,
     marginBottom: 10
+  },
+
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    backgroundColor: 'transparent'
+  },
+
+  alertIcon: {
+    marginRight: 8,
+  },
+
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    flex: 1,
   }
 });

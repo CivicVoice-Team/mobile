@@ -1,20 +1,21 @@
 import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 type TopBarProps = {
     title?: string;
-    onSearchPress?: () => void;
 };
 
-export default function TopBar({ title = 'Monroe County Recycling', onSearchPress }: TopBarProps) {
+export default function TopBar({ title = 'Monroe County Recycling',}: TopBarProps) {
     const insets = useSafeAreaInsets();
+    const router = useRouter();
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
             <View style={styles.inner}>
                 <Text style={styles.title}>{title}</Text>
-                <TouchableOpacity onPress={onSearchPress} activeOpacity={0.7}>
+                <TouchableOpacity onPress={() => router.push('/faq-search')} activeOpacity={0.7}>
                     <Ionicons name="search" size={22} color="white" />
                 </TouchableOpacity>
             </View>
