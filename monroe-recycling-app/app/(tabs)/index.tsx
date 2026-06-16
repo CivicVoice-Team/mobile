@@ -24,6 +24,7 @@ type NewsItem = {
   title_es?: string
   description_es?: string;
   video_url?: string;
+  link_url?: string;
 };
 
 type NotificationItem = {
@@ -183,7 +184,7 @@ export default function HomeScreen() {
         const imageUrl = item.video_url?.[0];
 
         return (
-          <Link key={item.newsletter_id} href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null}}}>
+          <Link key={item.newsletter_id} href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null, link_url: item.link_url ?? null,}}}>
             <ThemedView style={[styles.card, styles.blueCard]}>
               {imageUrl ? (<Image source={{ uri: imageUrl}} style={styles.newsImage} contentFit='cover'/>) : null}
               <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>

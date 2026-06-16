@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/themed-text";
 import { useColorScheme } from "react-native";
@@ -7,7 +7,7 @@ import { ThemedView } from "@/components/themed-view";
 import { Image } from 'expo-image';
 
 export default function NewsDetail() {
-    const { title, description, date, imageUrl } = useLocalSearchParams();
+    const { title, description, date, imageUrl, link_url } = useLocalSearchParams();
     const router = useRouter();
     const colorScheme = useColorScheme();
 
@@ -36,6 +36,17 @@ export default function NewsDetail() {
                 <ThemedText style={styles.body}>
                     {description}
                 </ThemedText>
+
+                {link_url ? (
+                  <TouchableOpacity
+                    style={styles.readMoreButton}
+                    onPress={() => Linking.openURL(link_url as string)}
+                  >
+                    <ThemedText style={styles.readMoreText}>
+                      Read More
+                    </ThemedText>
+                  </TouchableOpacity>
+                ) : null}
             </ScrollView>
         </ThemedView>
     );
@@ -65,5 +76,19 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 220,
     marginBottom: 16
+  },
+
+  readMoreButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#456781",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  readMoreText: {
+    color: "#fff",
+    fontWeight: "600"
   }
 });
