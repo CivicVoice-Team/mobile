@@ -110,6 +110,18 @@ export default function TabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="faq/[id]"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="faq-search"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
