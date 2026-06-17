@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Image, FlatList } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
@@ -7,6 +7,7 @@ import { fetchFAQs, FAQItem } from '@/services/faqs';
 export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const router = useRouter();
+    const getFaqImageUrl = (faqId: string) => `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faqId}`;
 
     useEffect(() => {
         async function load() {
@@ -20,40 +21,49 @@ export default function FAQSearchScreen() {
     }, []);
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <ThemedText type="title">FAQs</ThemedText>
+        <FlatList
+    data={faqs}
+    keyExtractor={(item) => item.id}
+    contentContainerStyle={styles.container}
+    renderItem={({ item: faq }) => (
+        <Pressable
+            style={styles.card}
+            onPress={() =>
+                router.push({
+                    pathname: "/faq/[id]",
+                    params: {
+                        id: faq.id,
+                        question: faq.question,
+                        answer: faq.answer,
+                    },
+                })
+            }
+        >
+            <Image
+                source={{ uri: getFaqImageUrl(faq.id) }}
+                style={styles.image}
+                resizeMode="cover"
+            />
 
-            {faqs.map((faq) => (
-                <Pressable
-                    key={faq.id}
-                    style={styles.card}
-                    onPress={() =>
-                        router.push({
-                            pathname: "/faq/[id]",
-                            params: {
-                                id: faq.id,
-                                question: faq.question,
-                                answer: faq.answer,
-                            },
-                        })
-                    }
-                >
-                    <ThemedText style={styles.question}>
-                        {faq.question}
-                    </ThemedText>
+            <View style={styles.textContainer}>
+                <ThemedText style={styles.question}>
+                    {faq.question}
+                </ThemedText>
 
-                    <ThemedText style={styles.readMore}>
-                        Tap to read
-                    </ThemedText>
-                </Pressable>
-            ))}
-        </ScrollView>
+                <ThemedText style={styles.readMore}>
+                    Tap to read
+                </ThemedText>
+            </View>
+        </Pressable>
+    )}
+/>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16
+        padding: 16,
+        paddingTop: 100
     },
 
     card: {
@@ -61,6 +71,8 @@ const styles = StyleSheet.create({
         padding: 14,
         borderRadius: 12,
         marginBottom: 12,
+        flexDirection: "row",
+        alignItems: "center"
     },
 
     question: {
@@ -73,4 +85,15 @@ const styles = StyleSheet.create({
         color: "#fff",
         textDecorationLine: "underline",
     },
+
+    image: {
+        width: 80,
+        height: 60,
+        borderRadius: 8,
+        marginRight: 12
+    },
+
+    textContainer: {
+        flex: 1
+    }
 });

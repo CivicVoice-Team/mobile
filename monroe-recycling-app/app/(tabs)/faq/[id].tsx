@@ -1,12 +1,13 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FAQDetail() {
-    const { question, answer } = useLocalSearchParams();
+    const { id, question, answer } = useLocalSearchParams();
     const router = useRouter();
+    const imageUrl = `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${id}`;
 
     return (
         <ThemedView style={{ flex: 1 }}>
@@ -14,6 +15,12 @@ export default function FAQDetail() {
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#456781" />
                 </TouchableOpacity>
+
+                <Image
+                    source={{ uri: imageUrl }}
+                    style={styles.heroImage}
+                    resizeMode="cover"
+                />
 
                 <ThemedText type="title">{question}</ThemedText>
 
@@ -27,7 +34,8 @@ export default function FAQDetail() {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20
+        padding: 20,
+        paddingTop: 100
     },
 
     answer: {
@@ -35,4 +43,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         lineHeight: 24
     },
+
+    heroImage: {
+        width: "100%",
+        height: 220,
+        borderRadius: 16,
+        marginTop: 16,
+        marginBottom: 20
+    }
 });
