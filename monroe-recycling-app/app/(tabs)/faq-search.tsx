@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable, Image, FlatList } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Image, FlatList, TextInput } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
@@ -8,13 +8,20 @@ export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const router = useRouter();
     const getFaqImageUrl = (faqId: string) => `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faqId}`;
+    const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
         async function load() {
             const skill_id = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
 
             const data = await fetchFAQs(skill_id);
-            setFaqs(data);
+
+            const sortedFaqs = [...data].sort((a, b) =>
+                a.question.trim().toLowerCase()
+                    .localeCompare(b.question.trim().toLowerCase())
+            );
+
+            setFaqs(sortedFaqs);
         }
 
         load();
@@ -22,22 +29,31 @@ export default function FAQSearchScreen() {
 
     return (
         <FlatList
-    data={faqs}
-    keyExtractor={(item) => item.id}
-    contentContainerStyle={styles.container}
-    renderItem={({ item: faq }) => (
-        <Pressable
-            style={styles.card}
-            onPress={() =>
-                router.push({
-                    pathname: "/faq/[id]",
-                    params: {
-                        id: faq.id,
-                        question: faq.question,
-                        answer: faq.answer,
-                    },
-                })
+            data={faqs}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.container}
+            ListHeaderComponent={
+                <TextInput
+                    style={styles.searchBar}
+                    placeholder='Search FAQs... (Not functional yet)'
+                    placeholderTextColor="#888"
+                    value={searchText}
+                    onChangeText={setSearchText}
+                />
             }
+            renderItem={({ item: faq }) => (
+                <Pressable
+                    style={styles.card}
+                    onPress={() =>
+                        router.push({
+                            pathname: "/faq/[id]",
+                            params: {
+                                id: faq.id,
+                                question: faq.question,
+                                answer: faq.answer,
+                            },
+                        })
+                    }
         >
             <Image
                 source={{ uri: getFaqImageUrl(faq.id) }}
@@ -95,5 +111,16 @@ const styles = StyleSheet.create({
 
     textContainer: {
         flex: 1
+    },
+
+    searchBar: {
+        backgroundColor: "#fff",
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        marginBottom: 16,
+        fontSize: 16
     }
 });

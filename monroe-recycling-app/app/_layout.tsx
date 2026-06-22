@@ -29,9 +29,7 @@ function RootLayoutInner() {
       await NavigationBar.setBackgroundColorAsync(
         theme === 'dark' ? '#000000' : '#152e70'
       );
-      await NavigationBar.setButtonStyleAsync(
-        theme === 'dark' ? 'light' : 'light'
-      );
+      await NavigationBar.setButtonStyleAsync('light');
     };
 
     applyNavBarStyle();
@@ -50,7 +48,7 @@ function RootLayoutInner() {
       </Stack>
 
       <StatusBar
-        style={theme === 'dark' ? 'light' : 'light'}
+        style={'light'}
         backgroundColor={theme === 'dark' ? '#000000' : '#152370'} //1B633B for green
       />
     </ThemeProvider>
