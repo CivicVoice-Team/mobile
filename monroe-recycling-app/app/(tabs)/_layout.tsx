@@ -1,19 +1,59 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Ionicons } from '@expo/vector-icons';
+import { TabIcon } from '@/components/tab-icon';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-import TopBar from '@/components/topbar';
+function createTabBarIcon(
+  iconName: React.ComponentProps<typeof Ionicons>['name']
+) {
+  return function TabBarIcon(props: {
+    color: string;
+    size: number;
+    focused: boolean;
+  }) {
+    return (
+      <TabIcon
+        {...props}
+        name={iconName}
+      />
+    );
+  };
+}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const TABS = [
+        {
+            name: 'camera',
+            title: 'Camera',
+            tabBarIcon: createTabBarIcon('camera')
+        },
+        {
+            name: 'index',
+            title: 'Home',
+            tabBarIcon: createTabBarIcon('home')
+        },
+        {
+            name: 'ecopark',
+            title: 'Ecopark',
+            tabBarIcon: createTabBarIcon('leaf')
+        },
+        {
+            name: 'profile',
+            title: 'Profile',
+            tabBarIcon: createTabBarIcon('person')
+        }
+    ] as const;
+
   return (
+    
     <Tabs
       initialRouteName='index'
       backBehavior='history'
@@ -21,90 +61,18 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: {
-          backgroundColor: '#152e70',
-        },
+        tabBarStyle: { backgroundColor: '#152e70' },
       }}>
-      <Tabs.Screen
-        name="camera"
-        options={{
-          title: 'Camera',
-          tabBarIcon: ({ color, size, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused && styles.activeIconContainer,
-              ]}
-            >
-              <Ionicons
-                size={size ?? 28}
-                name="camera"
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused && styles.activeIconContainer,
-              ]}
-            >
-              <Ionicons
-                size={size ?? 28}
-                name="home"
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="ecopark"
-        options={{
-          title: 'Ecopark',
-          tabBarIcon: ({ color, size, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused && styles.activeIconContainer,
-              ]}
-            >
-              <Ionicons
-                size={size ?? 28}
-                name="leaf"
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused && styles.activeIconContainer,
-              ]}
-            >
-              <Ionicons
-                size={size ?? 28}
-                name="person"
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
+      {TABS.map(tab => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: tab.title,
+            tabBarIcon: tab.tabBarIcon,
+          }}
+        />
+      ))}
       <Tabs.Screen
         name="news/[id]"
         options={{
