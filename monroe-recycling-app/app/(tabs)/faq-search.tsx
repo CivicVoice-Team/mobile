@@ -3,12 +3,28 @@ import { View, StyleSheet, ScrollView, Pressable, Image, FlatList, TextInput } f
 import { ThemedText } from '@/components/themed-text';
 import { useRouter } from 'expo-router';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
+import { searchFAQs } from '@/services/faqSearch';
+
+// export async function searchFAQs(
+//     skillId: string,
+//     query: string
+// ) {
+//     const resp = await API.post("api", "search_faq", {
+//         body: {
+//             query,
+//             skill_id: skillId,
+//         },
+//     });
+
+//     return resp.results || [];
+// }
 
 export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const router = useRouter();
     const getFaqImageUrl = (faqId: string) => `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faqId}`;
     const [searchText, setSearchText] = useState('');
+    const [filteredFaqs, setFilteredFaqs] = useState<FAQItem[] | null>(null);
 
     useEffect(() => {
         async function load() {
@@ -27,15 +43,36 @@ export default function FAQSearchScreen() {
         load();
     }, []);
 
+    useEffect(() => {
+        const skillId = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
+
+        if (searchText.trim().length < 2) {
+            setFilteredFaqs(null);
+            return;
+        }
+
+        const timeout = setTimeout(async () => {
+            try {
+                const results = await searchFAQs(searchText, skillId);
+
+                setFilteredFaqs(results);
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [searchText]);
+
     return (
         <FlatList
-            data={faqs}
+            data={filteredFaqs ?? faqs}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.container}
             ListHeaderComponent={
                 <TextInput
                     style={styles.searchBar}
-                    placeholder='Search FAQs... (Not functional yet)'
+                    placeholder='Search Items...'
                     placeholderTextColor="#888"
                     value={searchText}
                     onChangeText={setSearchText}
