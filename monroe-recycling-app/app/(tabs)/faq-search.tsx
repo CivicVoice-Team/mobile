@@ -95,16 +95,16 @@ export default function FAQSearchScreen() {
             <Image
                 source={{ uri: getFaqImageUrl(faq.id) }}
                 style={styles.image}
-                resizeMode="cover"
+                resizeMode="contain"
             />
 
             <View style={styles.textContainer}>
                 <ThemedText style={styles.question}>
-                    {faq.question}
+                    {faq.question.split(",")[0]}
                 </ThemedText>
 
-                <ThemedText style={styles.readMore}>
-                    Tap to read
+                <ThemedText style={styles.readMore} numberOfLines={1} ellipsizeMode="tail">
+                    {faq.answer}
                 </ThemedText>
             </View>
         </Pressable>
@@ -136,14 +136,15 @@ const styles = StyleSheet.create({
 
     readMore: {
         color: "#fff",
-        textDecorationLine: "underline",
+        //textDecorationLine: "underline",
     },
 
     image: {
         width: 80,
-        height: 60,
+        aspectRatio: 1,
         borderRadius: 8,
-        marginRight: 12
+        marginRight: 12,
+        alignSelf: "flex-start"
     },
 
     textContainer: {
