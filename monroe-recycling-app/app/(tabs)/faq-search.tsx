@@ -80,14 +80,15 @@ export default function FAQSearchScreen() {
             }
             renderItem={({ item: faq }) => (
                 <Pressable
-                    style={styles.card}
+                    style={[styles.card, faq.hazardous && styles.hazardousCard]}
                     onPress={() =>
                         router.push({
                             pathname: "/faq/[id]",
                             params: {
                                 id: faq.id,
                                 question: faq.question,
-                                answer: faq.answer,
+                                answer: faq.description,
+                                tags: JSON.stringify(faq.tags),
                             },
                         })
                     }
@@ -104,8 +105,18 @@ export default function FAQSearchScreen() {
                 </ThemedText>
 
                 <ThemedText style={styles.readMore} numberOfLines={1} ellipsizeMode="tail">
-                    {faq.answer}
+                    {faq.description}
                 </ThemedText>
+
+                <View style={styles.tagContainer}>
+                    {faq.tags.slice(0, 3).map((tag, index) => (
+                        <View key={index} style={styles.tagPill}>
+                            <ThemedText style={styles.tagText}>
+                                {tag.name}
+                            </ThemedText>
+                        </View>
+                    ))}
+                </View>
             </View>
         </Pressable>
     )}
@@ -126,6 +137,11 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         flexDirection: "row",
         alignItems: "center"
+    },
+
+    hazardousCard: {
+        borderRightWidth: 6,
+        borderRightColor: "red"
     },
 
     question: {
@@ -160,5 +176,26 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         marginBottom: 16,
         fontSize: 16
-    }
+    },
+
+    tagContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        marginTop: 8
+    },
+
+    tagPill: {
+        backgroundColor: "#3F434D",
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        marginRight: 6,
+        marginTop: 4,
+    },
+
+    tagText: {
+        color: "white",
+        fontSize: 12,
+        fontWeight: "600",
+    },
 });

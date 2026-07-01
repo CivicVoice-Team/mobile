@@ -15,6 +15,10 @@ export async function searchFAQs(query: string, skillId: string) {
   return (data.results || []).map((item: any) => ({
     ...item,
     id: item.id ?? item.objectID,
+    hazardous: item.hazardous ?? false,
+    description:
+      item.mobile && item.mobile.trim().length > 0 ? item.mobile : item.answer,
+    tags: item.tags ?? [],
   }));
 
 //   return data.results || [];
