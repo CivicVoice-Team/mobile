@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, TouchableOpacity, Image, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, Image, View, Linking } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,7 +34,17 @@ export default function FAQDetail() {
                         <TouchableOpacity
                             key={index}
                             style={styles.detailTag}
-                            onPress={() => {}}
+                            onPress={async () => {
+                                if (!tag.link) return;
+
+                                const supported = await Linking.canOpenURL(tag.link);
+
+                                if (supported) {
+                                    await Linking.openURL(tag.link);
+                                } else {
+                                    console.warn(`Cannot open URL: ${tag.link}`);
+                                }
+                            }}
                         >
                             <ThemedText style={styles.detailTagText}>
                                 {tag.name}
