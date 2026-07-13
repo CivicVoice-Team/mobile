@@ -168,12 +168,12 @@ const styles = StyleSheet.create({
     },
 
     searchBar: {
-        backgroundColor: "#fff",
+        backgroundColor: "transparent",
         borderWidth: 1,
         borderColor: "#ddd",
         borderRadius: 12,
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingVertical: 6,
         marginBottom: 16,
         fontSize: 16
     },

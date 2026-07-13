@@ -20,14 +20,10 @@ export default function FAQDetail() {
                 <Image
                     source={{ uri: imageUrl }}
                     style={styles.heroImage}
-                    resizeMode="cover"
+                    resizeMode="contain"
                 />
 
-                <ThemedText type="title">{question}</ThemedText>
-
-                <ThemedText style={styles.answer}>
-                    {answer}
-                </ThemedText>
+                <ThemedText type="title" style={styles.title}>{question}</ThemedText>
 
                 <View style={styles.tagContainer}>
                     {parsedTags.map((tag: any, index: number) => (
@@ -52,12 +48,21 @@ export default function FAQDetail() {
                         </TouchableOpacity>
                     ))}
                 </View>
+
+                <ThemedText style={styles.answer}>
+                    {answer}
+                </ThemedText>
+
             </ScrollView>
         </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
+    title: {
+        fontSize: 24
+    },
+
     container: {
         padding: 20,
         paddingTop: 100
@@ -74,7 +79,8 @@ const styles = StyleSheet.create({
         height: 220,
         borderRadius: 16,
         marginTop: 16,
-        marginBottom: 20
+        marginBottom: 20,
+        alignSelf: "flex-start"
     },
 
     tagContainer: {
