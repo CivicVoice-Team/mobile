@@ -10,6 +10,16 @@ export default function FAQDetail() {
     const router = useRouter();
     const imageUrl = `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${id}`;
 
+    const TAG_COLORS = {
+        green: "#3FA34D",
+        blue: "#3478F6",
+        red: "#D9534F",
+        orange: "#F59E0B",
+        yellow: "#EAB308",
+        purple: "#8B5CF6",
+        gray: "#6B7280",
+    };
+
     return (
         <ThemedView style={{ flex: 1 }}>
             <ScrollView contentContainerStyle={styles.container}>
@@ -29,7 +39,13 @@ export default function FAQDetail() {
                     {parsedTags.map((tag: any, index: number) => (
                         <TouchableOpacity
                             key={index}
-                            style={styles.detailTag}
+                            style={[styles.detailTag,
+                                {
+                                    backgroundColor:
+                                    TAG_COLORS[tag.color as keyof typeof TAG_COLORS] ??
+                                    "#3FA34D",
+                                },
+                            ]}
                             onPress={async () => {
                                 if (!tag.link) return;
 
@@ -90,7 +106,6 @@ const styles = StyleSheet.create({
     },
 
     detailTag: {
-        backgroundColor: "#3FA34D",
         borderRadius: 8,
         paddingHorizontal: 14,
         paddingVertical: 8,
