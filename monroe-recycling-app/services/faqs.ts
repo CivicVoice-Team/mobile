@@ -12,6 +12,7 @@ export type FAQItem = {
     mobile?: string;
     description: string;
     tags: FAQTag[];
+    updatedAt?: string;
 }
 
 export async function fetchFAQs(skill_id: string): Promise<FAQItem[]> {

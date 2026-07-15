@@ -5,10 +5,16 @@ import { ThemedView } from "@/components/themed-view";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FAQDetail() {
-    const { id, question, answer, tags } = useLocalSearchParams();
+    const { id, question, answer, tags, updatedAt } = useLocalSearchParams();
     const parsedTags = typeof tags === "string" ? JSON.parse(tags) : [];
     const router = useRouter();
-    const imageUrl = `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${id}`;
+
+    const baseImageUrl =
+        `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${id}`;
+
+    const imageUrl =
+        updatedAt && typeof updatedAt === "string"
+            ? `${baseImageUrl}?v=${encodeURIComponent(updatedAt)}` : baseImageUrl;
 
     const TAG_COLORS = {
         green: "#3FA34D",

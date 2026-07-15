@@ -22,9 +22,14 @@ import { searchFAQs } from '@/services/faqSearch';
 export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const router = useRouter();
-    const getFaqImageUrl = (faqId: string) => `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faqId}`;
     const [searchText, setSearchText] = useState('');
     const [filteredFaqs, setFilteredFaqs] = useState<FAQItem[] | null>(null);
+
+    const getFaqImageUrl = (faq: FAQItem) => {
+        const base = `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faq.id}`;
+
+        return faq.updatedAt ? `${base}?v=${encodeURIComponent(faq.updatedAt)}` : base;
+    }
 
     useEffect(() => {
         async function load() {
@@ -89,12 +94,13 @@ export default function FAQSearchScreen() {
                                 question: faq.question,
                                 answer: faq.description,
                                 tags: JSON.stringify(faq.tags),
+                                updatedAt: faq.updatedAt ?? ""
                             },
                         })
                     }
         >
             <Image
-                source={{ uri: getFaqImageUrl(faq.id) }}
+                source={{ uri: getFaqImageUrl(faq) }}
                 style={styles.image}
                 resizeMode="contain"
             />
