@@ -26,6 +26,23 @@ export default function FAQDetail() {
         gray: "#6B7280",
     };
 
+    const TAG_ICONS = {
+        leaf: "leaf",
+        caution: "warning",
+        dollar: "cash",
+        calendar: "calendar",
+        clock: "time",
+        location: "location"
+    } as const;
+
+    const getTagUrl = (tag: any) => {
+        if (tag.type === "maps") {
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tag.name)}`;
+        }
+
+        return tag.link;
+    }
+
     return (
         <ThemedView style={{ flex: 1 }}>
             <ScrollView contentContainerStyle={styles.container}>
@@ -53,20 +70,33 @@ export default function FAQDetail() {
                                 },
                             ]}
                             onPress={async () => {
-                                if (!tag.link) return;
+                                const url = getTagUrl(tag);
 
-                                const supported = await Linking.canOpenURL(tag.link);
+                                if (!url) return;
+
+                                const supported = await Linking.canOpenURL(url);
 
                                 if (supported) {
-                                    await Linking.openURL(tag.link);
+                                    await Linking.openURL(url);
                                 } else {
-                                    console.warn(`Cannot open URL: ${tag.link}`);
+                                    console.warn(`Cannot open URL: ${url}`);
                                 }
                             }}
                         >
-                            <ThemedText style={styles.detailTagText}>
-                                {tag.name}
-                            </ThemedText>
+                            <View style={styles.tagContent}>
+                                {tag.icon && TAG_ICONS[tag.icon as keyof typeof TAG_ICONS] && (
+                                    <Ionicons
+                                        name={TAG_ICONS[tag.icon as keyof typeof TAG_ICONS]}
+                                        size={14}
+                                        color="white"
+                                        style={styles.tagIcon}
+                                    />
+                                )}
+
+                                <ThemedText style={styles.detailTagText}>
+                                    {tag.name}
+                                </ThemedText>
+                            </View>
                         </TouchableOpacity>
                     ))}
                 </View>
@@ -122,5 +152,14 @@ const styles = StyleSheet.create({
     detailTagText: {
         color: "white",
         fontWeight: "600"
+    },
+
+    tagContent: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    tagIcon: {
+        marginRight: 6,
     }
 });

@@ -114,7 +114,7 @@ export default function FAQSearchScreen() {
                     {faq.description}
                 </ThemedText>
 
-                <View style={styles.tagContainer}>
+                {/* <View style={styles.tagContainer}>
                     {faq.tags.slice(0, 3).map((tag, index) => (
                         <View key={index} style={styles.tagPill}>
                             <ThemedText style={styles.tagText}>
@@ -122,7 +122,7 @@ export default function FAQSearchScreen() {
                             </ThemedText>
                         </View>
                     ))}
-                </View>
+                </View> */}
             </View>
         </Pressable>
     )}
