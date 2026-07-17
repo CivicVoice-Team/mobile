@@ -1,50 +1,39 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable, Image, FlatList, TextInput } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
+
 import { useRouter } from 'expo-router';
-import { fetchFAQs, FAQItem } from '@/services/faqs';
+import { FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
+
+import { ThemedText } from '@/components/themed-text';
 import { searchFAQs } from '@/services/faqSearch';
-
-// export async function searchFAQs(
-//     skillId: string,
-//     query: string
-// ) {
-//     const resp = await API.post("api", "search_faq", {
-//         body: {
-//             query,
-//             skill_id: skillId,
-//         },
-//     });
-
-//     return resp.results || [];
-// }
+import { fetchFAQs, FAQItem } from '@/services/faqs';
 
 export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
-    const router = useRouter();
     const [searchText, setSearchText] = useState('');
     const [filteredFaqs, setFilteredFaqs] = useState<FAQItem[] | null>(null);
 
+    const router = useRouter();
+
+    const SKILL_ID = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
+
     const getFaqImageUrl = (faq: FAQItem) => {
         const base = `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faq.id}`;
-
         return faq.updatedAt ? `${base}?v=${encodeURIComponent(faq.updatedAt)}` : base;
     }
 
+    const sortFaqs = (faqs: FAQItem[]) =>
+        [...faqs].sort((a, b) =>
+        a.question.trim().toLowerCase()
+        .localeCompare(b.question.trim().toLowerCase()))
+
     useEffect(() => {
         async function load() {
-            const skill_id = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
-
-            const data = await fetchFAQs(skill_id);
-
-            const sortedFaqs = [...data].sort((a, b) =>
-                a.question.trim().toLowerCase()
-                    .localeCompare(b.question.trim().toLowerCase())
-            );
-
-            setFaqs(sortedFaqs);
+            try {
+                setFaqs(sortFaqs(await fetchFAQs(SKILL_ID)));
+            } catch (error) {
+                console.error("Failed to load FAQs", error);
+            }
         }
-
         load();
     }, []);
 
