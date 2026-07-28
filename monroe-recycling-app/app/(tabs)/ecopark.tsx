@@ -58,7 +58,7 @@ export default function LocationScreen() {
   }, []);
 
   return (
-    <ThemedView style={{flex:1}}>
+    <ThemedView style={{flex:1, backgroundColor: "#e2f1e5"}}>
       <ScrollView contentContainerStyle={styles.container}>
         <ThemedView style={styles.titleContainer} >
             <ThemedText type="title">
@@ -118,7 +118,8 @@ const styles = StyleSheet.create({
 
   titleContainer: {
     paddingVertical: 10,
-    paddingTop: 100
+    paddingTop: 100,
+    backgroundColor: "#e2f1e5"
   },
 
   card: {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   },
 
   blueCard: {
-    backgroundColor: "#456781",
+    backgroundColor: "#456B55",
   },
 
   locationTitle: {

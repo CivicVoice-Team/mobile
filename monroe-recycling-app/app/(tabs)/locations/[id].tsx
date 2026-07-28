@@ -1,44 +1,36 @@
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, TouchableOpacity, View, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 
+type Tag = {
+  name: string;
+  type: string;
+  icon: string;
+  color: string;
+  link: string;
+};
+
+type LocationItem = {
+  location_id : string;
+  skill_id: string;
+  title: string;
+  about: string;
+  address: string;
+  hours: string;
+  phone: string;
+  homophones: string[];
+  tags: Tag[];
+}
+
 export default function LocationsDetail() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
-  const location = {
-    title: "Ecopark",
-    address: "10 Avion Drive, Town of Chili",
-    about:
-      "Please note that the recycling stations at ecopark are self-serve (with the exception of Household Hazardous Waste). Residents should be prepared to unload their own items.\n\nAn appointment is required to drop off Household Hazardous Waste.",
-    hours:
-      "Wednesday 1:00 PM - 6:30 PM\nSaturday 7:30 AM - 1:00 PM\nClosed on Holidays",
-    tags: [
-      {
-        name: "Ecopark",
-        color: "orange",
-        icon: "location",
-        type: "maps",
-        link: "",
-      },
-      {
-        name: "Website",
-        color: "green",
-        icon: "leaf",
-        type: "website",
-        link: "https://www.monroecounty.gov/ecopark",
-      },
-      {
-        name: "HHW Appointment",
-        color: "blue",
-        icon: "calendar",
-        type: "custom",
-        link: "https://wp.monroecounty.gov/hhw",
-      },
-    ],
-  };
+  const [location, setLocation] = useState<LocationItem | null>(null);
 
   const TAG_COLORS = {
     green: "#3FA34D",
@@ -69,8 +61,58 @@ export default function LocationsDetail() {
     return tag.link;
   };
 
+  async function fetchLocations(
+    skill_id:string
+  ): Promise<LocationItem[]> {
+    const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/locations?skill_id=${skill_id}`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch locations: ${res.status}`);
+    }
+
+    return res.json();
+  }
+
+  useEffect(() => {
+    async function loadLocation() {
+      try {
+        const data = await fetchLocations(
+          "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d"
+        );
+
+        const found = data.find(
+          (location) => location.location_id === id
+        );
+
+        if (found) {
+          setLocation(found);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadLocation();
+  }, [id]);
+
+  if (!location) {
+    return (
+      <ThemedView
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ThemedText>Loading...</ThemedText>
+      </ThemedView>
+    );
+  }
+
   return (
-    <ThemedView style={{ flex: 1 }}>
+    <ThemedView style={{ flex: 1, backgroundColor: "#e2f1e5" }}>
       <ScrollView contentContainerStyle={styles.container}>
 
         <TouchableOpacity onPress={() => router.back()}>
@@ -79,6 +121,14 @@ export default function LocationsDetail() {
 
         <ThemedText type="title" style={styles.title}>
           {location.title}
+        </ThemedText>
+
+        <ThemedText type="subtitle" style={styles.heading}>
+          About
+        </ThemedText>
+
+        <ThemedText style={styles.body}>
+          {location.about}
         </ThemedText>
 
         <View style={styles.tagContainer}>
@@ -138,14 +188,6 @@ export default function LocationsDetail() {
           {location.hours}
         </ThemedText>
 
-        <ThemedText type="subtitle" style={styles.heading}>
-          About
-        </ThemedText>
-
-        <ThemedText style={styles.body}>
-          {location.about}
-        </ThemedText>
-
       </ScrollView>
     </ThemedView>
   );
@@ -166,7 +208,7 @@ const styles = StyleSheet.create({
   heading: {
     marginTop: 20,
     marginBottom: 6,
-    color: "#456781",
+    color: "#456B55",
   },
 
   text: {
@@ -178,6 +220,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 26,
     marginTop: 4,
+    marginBottom: 4,
   },
 
   tagContainer: {

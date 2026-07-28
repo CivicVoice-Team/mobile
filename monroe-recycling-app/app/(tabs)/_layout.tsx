@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -28,6 +28,9 @@ function createTabBarIcon(
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const segments = useSegments() as string[];
+
+  const isLocationScreen = segments.includes("locations") || segments.includes("ecopark");
 
   const TABS = [
         {
@@ -61,7 +64,9 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: { backgroundColor: '#152e70' },
+        tabBarStyle: { 
+          backgroundColor: isLocationScreen ? "#2E623C" : "#152e70", 
+        },
       }}>
       {TABS.map(tab => (
         <Tabs.Screen

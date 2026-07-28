@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSegments } from "expo-router";
 
 type TabIconProps = Readonly<{
     name: React.ComponentProps<typeof Ionicons>['name'];
@@ -15,11 +16,17 @@ export function TabIcon({
     size,
     focused,
 }: TabIconProps) {
+    const segments = useSegments() as string[];
+
+    const isLocationScreen = segments.includes("ecopark") || segments.includes("locations");
+
     return (
         <View
             style={[
                 styles.iconContainer,
-                focused && styles.activeIconContainer
+                focused && styles.activeIconContainer, {
+                    backgroundColor: isLocationScreen ? "#2E623C" : "#152e70",
+                }
             ]}
         >
             <Ionicons

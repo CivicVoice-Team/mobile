@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 
 type TopBarProps = {
     title?: string;
@@ -10,9 +10,12 @@ type TopBarProps = {
 export default function TopBar({ title = 'Monroe County Recycling',}: TopBarProps) {
     const insets = useSafeAreaInsets();
     const router = useRouter();
+    const segments = useSegments() as string[];
+
+    const isLocationScreen = segments.includes("locations") || segments.includes("ecopark");
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={[styles.container, { paddingTop: insets.top, backgroundColor: isLocationScreen ? "#2E623C" : "#152e70" }]}>
             <View style={styles.inner}>
                 <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity onPress={() => router.push('/faq-search')} activeOpacity={0.7}>
