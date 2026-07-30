@@ -11,6 +11,7 @@ export type FAQItem = {
     answer: string;
     mobile?: string;
     description: string;
+    read_more?: string;
     tags: FAQTag[];
     updatedAt?: string;
 }
@@ -37,6 +38,7 @@ export async function fetchFAQs(skill_id: string): Promise<FAQItem[]> {
 
             description: hasMobile ? item.mobile: item.answer,
             tags: item.tags ?? [],
+            read_more: item.read_more
         };
     });
 }

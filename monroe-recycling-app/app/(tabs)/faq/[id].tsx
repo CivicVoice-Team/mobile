@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, TouchableOpacity, Image, View, Linking } from "react-native";
 import { ThemedText } from "@/components/themed-text";
@@ -5,9 +6,13 @@ import { ThemedView } from "@/components/themed-view";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FAQDetail() {
-    const { id, question, answer, tags, updatedAt } = useLocalSearchParams();
+    const { id, question, answer, read_more, tags, updatedAt } = useLocalSearchParams();
     const parsedTags = typeof tags === "string" ? JSON.parse(tags) : [];
     const router = useRouter();
+    const [showReadMore, setShowReadMore] = useState(false);
+
+    const hasReadMore = 
+        typeof read_more === "string" && read_more.trim().length > 0;
 
     const baseImageUrl =
         `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${id}`;
@@ -105,6 +110,34 @@ export default function FAQDetail() {
                     {answer}
                 </ThemedText>
 
+                {hasReadMore && (
+                    <>
+                        <TouchableOpacity
+                            style={styles.readMoreButton}
+                            onPress={() => setShowReadMore(!showReadMore)}
+                        >
+                            <View style={styles.readMoreButtonContent}>
+                                <ThemedText style={styles.readMoreButtonText}>
+                                    {showReadMore ? "Hide Additional Information" : "Read More"}
+                                </ThemedText>
+
+                                <Ionicons
+                                    name={showReadMore ? "chevron-up" : "chevron-down"}
+                                    size={18}
+                                    color="white"
+                                    style={{ marginLeft: 6 }}
+                                />
+                            </View>
+                        </TouchableOpacity>
+
+                        {showReadMore && (
+                            <ThemedText style={styles.readMoreText}>
+                                {read_more}
+                            </ThemedText>
+                        )}
+                    </>
+                )}
+
             </ScrollView>
         </ThemedView>
     );
@@ -161,5 +194,30 @@ const styles = StyleSheet.create({
 
     tagIcon: {
         marginRight: 6,
+    },
+
+    readMoreButton: {
+        marginTop: 28,
+        backgroundColor: "#456781",
+        borderRadius: 10,
+        paddingVertical: 12,
+        alignItems: "center"
+    },
+
+    readMoreButtonContent: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+
+    readMoreButtonText: {
+        color: "white",
+        fontWeight: "600",
+        fontSize: 16,
+    },
+
+    readMoreText: {
+        marginTop: 16,
+        fontSize: 16,
+        lineHeight: 24
     }
 });

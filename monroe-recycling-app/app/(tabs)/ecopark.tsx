@@ -69,6 +69,7 @@ export default function LocationScreen() {
         {locations.map((location) => (
           <Link
             key={location.location_id}
+            style={styles.link}
             href={{
               pathname: "/locations/[id]",
               params: {
@@ -123,9 +124,12 @@ const styles = StyleSheet.create({
   },
 
   card: {
+    width: "100%",
+    alignSelf: "center",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
+    padding: 18,
+    minHeight: 180,
+    justifyContent: "space-between"
   },
 
   blueCard: {
@@ -139,6 +143,7 @@ const styles = StyleSheet.create({
 
   preview: {
     lineHeight: 20,
+    height: 60
   },
 
   address: {
@@ -153,6 +158,14 @@ const styles = StyleSheet.create({
   },
 
   container: {
-    padding: 20
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 32,
+    alignItems: "center"
+  },
+
+  link: {
+    width: "100%",
+    marginBottom: 16,
   }
 });

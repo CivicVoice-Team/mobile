@@ -16,6 +16,7 @@ export async function searchFAQs(query: string, skillId: string) {
     ...item,
     id: item.id ?? item.objectID,
     hazardous: item.hazardous ?? false,
+    read_more: item.read_more,
     description:
       item.mobile && item.mobile.trim().length > 0 ? item.mobile : item.answer,
     tags: item.tags ?? [],

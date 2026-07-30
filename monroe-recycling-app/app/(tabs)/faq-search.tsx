@@ -82,6 +82,7 @@ export default function FAQSearchScreen() {
                                 id: faq.id,
                                 question: faq.question,
                                 answer: faq.description,
+                                read_more: faq.read_more ?? "",
                                 tags: JSON.stringify(faq.tags),
                                 updatedAt: faq.updatedAt ?? ""
                             },
