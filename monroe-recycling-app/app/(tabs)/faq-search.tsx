@@ -6,6 +6,7 @@ import { FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-n
 import { ThemedText } from '@/components/themed-text';
 import { searchFAQs } from '@/services/faqSearch';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
@@ -100,6 +101,20 @@ export default function FAQSearchScreen() {
                     {faq.question.split(",")[0]}
                 </ThemedText>
 
+                {faq.hazardous && (
+                    <View style={styles.hazardBadge}>
+                        <Ionicons
+                            name="warning"
+                            size={14}
+                            color="white"
+                            style={{ marginRight: 4 }}
+                        />
+                        <ThemedText style={styles.hazardBadgeText}>
+                            Hazardous
+                        </ThemedText>
+                    </View>
+                )}
+
                 <ThemedText style={styles.readMore} numberOfLines={1} ellipsizeMode="tail">
                     {faq.description}
                 </ThemedText>
@@ -190,6 +205,23 @@ const styles = StyleSheet.create({
     },
 
     tagText: {
+        color: "white",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+
+    hazardBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        alignSelf: "flex-start",
+        backgroundColor: "#D9534F",
+        borderRadius: 999,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        marginBottom: 8,
+    },
+
+    hazardBadgeText: {
         color: "white",
         fontSize: 12,
         fontWeight: "600",
