@@ -216,7 +216,13 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     width: '100%',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 3},
+    elevation: 3
   },
 
   blueCard: {

@@ -1,64 +1,54 @@
-import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { useEffect, useState } from "react";
+
+import { Link } from "expo-router";
+import { ActivityIndicator, ScrollView, StyleSheet } from "react-native";
+
+import { fetchLocations } from "@/services/locations";
+import { LocationItem } from "@/types/location";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
-import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
 
-type Tag = {
-  name: string;
-  type: string;
-  icon: string;
-  color: string;
-  link: string;
-};
-
-type LocationItem = {
-  location_id : string;
-  skill_id: string;
-  title: string;
-  about: string;
-  address: string;
-  hours: string;
-  phone: string;
-  homophones: string[];
-  tags: Tag[];
-}
+const SKILL_ID = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
 
 export default function LocationScreen() {
   const [locations, setLocations] = useState<LocationItem[]>([]);
-
-  async function fetchLocations(
-    skill_id:string
-  ): Promise<LocationItem[]> {
-    const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/locations?skill_id=${skill_id}`;
-
-    const res = await fetch(url);
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch locations: ${res.status}`);
-    }
-
-    return res.json();
-  }
+  const [loading, setLoading] = useState(true);
+  const[error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadLocations() {
-      const skill_id = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
-
       try {
-        const data = await fetchLocations(skill_id);
+        const data = await fetchLocations(SKILL_ID);
         setLocations(data);
       } catch (err) {
         console.error(err);
+        setError("Couldn't load locations.")
+      } finally {
+        setLoading(false);
       }
     }
-
     loadLocations();
   }, []);
 
+  if (loading) {
+    return (
+      <ThemedView style={styles.centered}>
+        <ActivityIndicator size="large" color="#456B55" />
+        <ThemedText>Loading locations...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  if (error) {
+    return (
+      <ThemedView style={styles.centered}>
+        <ThemedText>{error}</ThemedText>
+      </ThemedView>
+    );
+  }
+
   return (
-    <ThemedView style={{flex:1, backgroundColor: "#e2f1e5"}}>
+    <ThemedView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.container}>
         <ThemedView style={styles.titleContainer} >
             <ThemedText type="title">
@@ -129,7 +119,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 18,
     minHeight: 180,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 3},
+    elevation: 3
   },
 
   blueCard: {
@@ -167,5 +162,16 @@ const styles = StyleSheet.create({
   link: {
     width: "100%",
     marginBottom: 16,
+  },
+
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  screen: {
+    flex: 1,
+    backgroundColor: "#e2f1e5"
   }
 });
