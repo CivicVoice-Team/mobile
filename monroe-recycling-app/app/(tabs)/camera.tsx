@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
 import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, CameraCapturedPicture } from "expo-camera";
+import * as FileSystem from "expo-file-system";
+import { detectImage } from "@/services/rekognition";
+import { useRouter } from "expo-router";
 
 export default function Camera() {
   const cameraRef = useRef<CameraView>(null);
+  const router = useRouter();
 
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<CameraCapturedPicture | null>(null);
@@ -50,6 +54,44 @@ export default function Camera() {
     }
   };
 
+  const usePhoto = async () => {
+    console.log("Use Photo pressed");
+
+    if (!photo) {
+      console.log("No photo available");
+      return;
+    }
+
+    console.log("Photo URI:", photo.uri);
+
+    if (!photo) return;
+
+    try {
+      setIsCapturing(true);
+
+      const file = new FileSystem.File(photo.uri);
+
+      const base64 = await file.base64();
+
+      const result = await detectImage(base64);
+
+      console.log("Rekognition result:", result);
+
+      if (result.label) {
+        router.push({
+          pathname: "/faq-search",
+          params: {
+            query: result.label
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to analyze image:", err);
+    } finally {
+      setIsCapturing(false);
+    }
+  }
+
   return (
     <View style={styles.container}>
       {photo ? (
@@ -70,10 +112,7 @@ export default function Camera() {
 
             <Pressable
               style={[styles.actionButton, styles.useButton]}
-              onPress={() => {
-                console.log("Use photo:", photo);
-                //replace this with the AWS upload later
-              }}
+              onPress={usePhoto}
             >
               <Text style={styles.actionButtonText}>Use Photo</Text>
             </Pressable>

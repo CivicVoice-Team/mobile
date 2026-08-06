@@ -8,9 +8,12 @@ import { searchFAQs } from '@/services/faqSearch';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useLocalSearchParams } from 'expo-router';
+
 export default function FAQSearchScreen() {
+    const params = useLocalSearchParams();
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
-    const [searchText, setSearchText] = useState('');
+    const [searchText, setSearchText] = useState("");
     const [filteredFaqs, setFilteredFaqs] = useState<FAQItem[] | null>(null);
 
     const router = useRouter();
@@ -58,6 +61,12 @@ export default function FAQSearchScreen() {
 
         return () => clearTimeout(timeout);
     }, [searchText]);
+
+    useEffect(() => {
+        if (typeof params.query === "string") {
+            setSearchText(params.query);
+        }
+    }, [params.query]);
 
     return (
         <FlatList
