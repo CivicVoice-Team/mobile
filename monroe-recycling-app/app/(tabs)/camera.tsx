@@ -78,6 +78,7 @@ export default function Camera() {
       console.log("Rekognition result:", result);
 
       if (result.label) {
+        setPhoto(null);
         router.push({
           pathname: "/faq-search",
           params: {
