@@ -1,9 +1,25 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { CameraView, useCameraPermissions, CameraCapturedPicture } from "expo-camera";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import {
+  CameraView,
+  useCameraPermissions,
+  CameraCapturedPicture,
+} from "expo-camera";
 import * as FileSystem from "expo-file-system";
 import { detectImage } from "@/services/rekognition";
 import { useRouter } from "expo-router";
+
+type RekognitionLabel = {
+  name: string;
+  confidence: number;
+};
 
 export default function Camera() {
   const cameraRef = useRef<CameraView>(null);
@@ -11,6 +27,7 @@ export default function Camera() {
 
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<CameraCapturedPicture | null>(null);
+  const [labels, setLabels] = useState<RekognitionLabel[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
 
   if (!permission) {
@@ -18,7 +35,7 @@ export default function Camera() {
       <View style={styles.center}>
         <ActivityIndicator size="large" />
       </View>
-    )
+    );
   }
 
   if (!permission.granted) {
@@ -42,9 +59,11 @@ export default function Camera() {
     setIsCapturing(true);
 
     try {
-      const captured = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+      const captured = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+      });
 
-      if(captured) {
+      if (captured) {
         setPhoto(captured);
       }
     } catch (err) {
@@ -64,38 +83,106 @@ export default function Camera() {
 
     console.log("Photo URI:", photo.uri);
 
-    if (!photo) return;
-
     try {
       setIsCapturing(true);
 
       const file = new FileSystem.File(photo.uri);
-
       const base64 = await file.base64();
 
       const result = await detectImage(base64);
 
       console.log("Rekognition result:", result);
 
-      if (result.label) {
-        setPhoto(null);
-        router.push({
-          pathname: "/faq-search",
-          params: {
-            query: result.label
-          }
-        });
+      // Store the top labels so we can display them to the user.
+      if (result.labels && result.labels.length > 0) {
+        setLabels(result.labels);
+      } else {
+        console.log("No labels returned from Rekognition");
       }
     } catch (err) {
       console.error("Failed to analyze image:", err);
     } finally {
       setIsCapturing(false);
     }
-  }
+  };
+
+  const selectLabel = (label: RekognitionLabel) => {
+    console.log("Selected label:", label.name);
+    console.log("Confidence:", label.confidence);
+
+    // Clear the current photo/labels before navigating.
+    setPhoto(null);
+    setLabels([]);
+
+    // Use the user's selected Rekognition label
+    // as the search term.
+    router.push({
+      pathname: "/faq-search",
+      params: {
+        query: label.name,
+      },
+    });
+  };
+
+  const retakePhoto = () => {
+    setPhoto(null);
+    setLabels([]);
+  };
 
   return (
     <View style={styles.container}>
-      {photo ? (
+      {labels.length > 0 ? (
+        // ----------------------------------------
+        // LABEL SELECTION SCREEN
+        // ----------------------------------------
+        <View style={styles.resultsContainer}>
+          <Image
+            source={{ uri: photo?.uri }}
+            style={styles.resultImage}
+            resizeMode="cover"
+          />
+
+          <View style={styles.resultsContent}>
+            <Text style={styles.resultsTitle}>
+              What is this item?
+            </Text>
+
+            <Text style={styles.resultsSubtitle}>
+              Select the option that best matches your item.
+            </Text>
+
+            <View style={styles.labelList}>
+              {labels.map((label, index) => (
+                <Pressable
+                  key={`${label.name}-${index}`}
+                  style={styles.labelButton}
+                  onPress={() => selectLabel(label)}
+                >
+                  <Text style={styles.labelName}>
+                    {label.name}
+                  </Text>
+
+                  <Text style={styles.confidence}>
+                    {Math.round(label.confidence)}%
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable
+              style={[styles.actionButton, styles.retakeButton]}
+              onPress={retakePhoto}
+            >
+              <Text style={styles.actionButtonText}>
+                Retake
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : photo ? (
+        // ----------------------------------------
+        // PHOTO PREVIEW SCREEN
+        // ----------------------------------------
         <View style={styles.previewContainer}>
           <Image
             source={{ uri: photo.uri }}
@@ -106,20 +193,33 @@ export default function Camera() {
           <View style={styles.previewControls}>
             <Pressable
               style={[styles.actionButton, styles.retakeButton]}
-              onPress={() => setPhoto(null)}
+              onPress={retakePhoto}
+              disabled={isCapturing}
             >
-              <Text style={styles.actionButtonText}>Retake</Text>
+              <Text style={styles.actionButtonText}>
+                Retake
+              </Text>
             </Pressable>
 
             <Pressable
               style={[styles.actionButton, styles.useButton]}
               onPress={usePhoto}
+              disabled={isCapturing}
             >
-              <Text style={styles.actionButtonText}>Use Photo</Text>
+              {isCapturing ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.actionButtonText}>
+                  Use Photo
+                </Text>
+              )}
             </Pressable>
           </View>
         </View>
       ) : (
+        // ----------------------------------------
+        // CAMERA SCREEN
+        // ----------------------------------------
         <>
           <CameraView
             ref={cameraRef}
@@ -131,6 +231,7 @@ export default function Camera() {
             <Pressable
               style={styles.captureButton}
               onPress={takePicture}
+              disabled={isCapturing}
             />
           </View>
         </>
@@ -184,6 +285,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  // ----------------------------------------
+  // PHOTO PREVIEW
+  // ----------------------------------------
+
   previewContainer: {
     flex: 1,
   },
@@ -193,26 +298,91 @@ const styles = StyleSheet.create({
     bottom: 40,
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-evenly"
+    justifyContent: "space-evenly",
   },
+
+  // ----------------------------------------
+  // LABEL RESULTS
+  // ----------------------------------------
+
+  resultsContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  resultImage: {
+    width: "100%",
+    height: "35%",
+  },
+
+  resultsContent: {
+    flex: 1,
+    padding: 20
+  },
+
+  resultsTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#222",
+    marginBottom: 0,
+  },
+
+  resultsSubtitle: {
+    fontSize: 15,
+    color: "#666",
+    marginBottom: 0,
+  },
+
+  labelList: {
+    padding: 10,
+    gap: 10
+  },
+
+  labelButton: {
+    backgroundColor: "#456781",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  labelName: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "600",
+    flex: 1,
+  },
+
+  confidence: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+    marginLeft: 12,
+  },
+
+  // ----------------------------------------
+  // ACTION BUTTONS
+  // ----------------------------------------
 
   actionButton: {
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 12
+    borderRadius: 12,
   },
 
   retakeButton: {
-    backgroundColor: "#666"
+    backgroundColor: "#666",
   },
 
   useButton: {
-    backgroundColor: "#456781"
+    backgroundColor: "#456781",
   },
 
   actionButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "600"
-  }
+    fontWeight: "600",
+  },
 });
