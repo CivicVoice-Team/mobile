@@ -7,8 +7,7 @@ import { fetchLocations } from "@/services/locations";
 import { LocationItem } from "@/types/location";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-
-const SKILL_ID = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
+import { SKILL_ID } from "@/constants/config";
 
 export default function LocationScreen() {
   const [locations, setLocations] = useState<LocationItem[]>([]);

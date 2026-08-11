@@ -9,6 +9,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { fetchMobileContent } from '@/services/mobileContent'
+import { SKILL_ID } from '@/constants/config';
 
 type MobileContentItem = {
   field_id: string;
@@ -42,9 +43,8 @@ export default function HomeScreen() {
   useEffect(() => {
     async function loadContent() {
       // Mobile Content
-      const skill_id = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
-
-      const data: MobileContentItem[] = await fetchMobileContent(skill_id);
+      
+      const data: MobileContentItem[] = await fetchMobileContent(SKILL_ID);
 
       const mapped: Record<string, string> = {};
 
@@ -56,7 +56,7 @@ export default function HomeScreen() {
 
       // Notification Content
       try {
-        const notifications = await fetchNotifications(skill_id);
+        const notifications = await fetchNotifications(SKILL_ID);
 
         //const latestNotification = notifications.filter((n) => n.state !== "INVALID").sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
@@ -79,7 +79,7 @@ export default function HomeScreen() {
 
       // News Content
       try {
-        const rawNews = await fetchNews(skill_id);
+        const rawNews = await fetchNews(SKILL_ID);
 
         const filteredNews = getLastYearNews(rawNews);
 

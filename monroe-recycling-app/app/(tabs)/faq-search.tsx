@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { searchFAQs } from '@/services/faqSearch';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
 import { Ionicons } from '@expo/vector-icons';
+import { SKILL_ID } from '@/constants/config';
 
 import { useLocalSearchParams } from 'expo-router';
 
@@ -17,8 +18,6 @@ export default function FAQSearchScreen() {
     const [filteredFaqs, setFilteredFaqs] = useState<FAQItem[] | null>(null);
 
     const router = useRouter();
-
-    const SKILL_ID = "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d";
 
     const getFaqImageUrl = (faq: FAQItem) => {
         const base = `https://civicvoice-faq-images.s3.us-east-1.amazonaws.com/public/${faq.id}`;
