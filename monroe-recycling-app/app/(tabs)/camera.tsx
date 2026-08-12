@@ -2,7 +2,9 @@ import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -15,6 +17,7 @@ import {
 import * as FileSystem from "expo-file-system";
 import { detectImage } from "@/services/rekognition";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 type RekognitionLabel = {
   name: string;
@@ -29,6 +32,7 @@ export default function Camera() {
   const [photo, setPhoto] = useState<CameraCapturedPicture | null>(null);
   const [labels, setLabels] = useState<RekognitionLabel[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isImageExpanded, setIsImageExpanded] = useState(false);
 
   if (!permission) {
     return (
@@ -132,52 +136,84 @@ export default function Camera() {
   return (
     <View style={styles.container}>
       {labels.length > 0 ? (
-        // ----------------------------------------
-        // LABEL SELECTION SCREEN
-        // ----------------------------------------
         <View style={styles.resultsContainer}>
-          <Image
-            source={{ uri: photo?.uri }}
-            style={styles.resultImage}
-            resizeMode="cover"
-          />
+          <ScrollView
+            style={styles.resultsScroll}
+            contentContainerStyle={styles.resultsScrollContent}
+          >
+            <Pressable onPress={() => setIsImageExpanded(true)}>
+              <Image
+                source={{ uri: photo?.uri }}
+                style={styles.resultImage}
+                resizeMode="contain"
+              />
 
-          <View style={styles.resultsContent}>
-            <Text style={styles.resultsTitle}>
-              What is this item?
-            </Text>
-
-            <Text style={styles.resultsSubtitle}>
-              Select the option that best matches your item.
-            </Text>
-
-            <View style={styles.labelList}>
-              {labels.map((label, index) => (
-                <Pressable
-                  key={`${label.name}-${index}`}
-                  style={styles.labelButton}
-                  onPress={() => selectLabel(label)}
-                >
-                  <Text style={styles.labelName}>
-                    {label.name}
-                  </Text>
-
-                  <Text style={styles.confidence}>
-                    {Math.round(label.confidence)}%
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Pressable
-              style={[styles.actionButton, styles.retakeButton]}
-              onPress={retakePhoto}
-            >
-              <Text style={styles.actionButtonText}>
-                Retake
-              </Text>
+              <View style={styles.expandHint}>
+                <Ionicons name="expand-outline" size={20} color="white" />
+                <Text style={styles.expandHintText}>
+                  Tap to expand
+                </Text>
+              </View>
             </Pressable>
-          </View>
+
+            <View style={styles.resultsContent}>
+              <Text style={styles.resultsTitle}>
+                What is this item?
+              </Text>
+
+              <Text style={styles.resultsSubtitle}>
+                Select the option that best matches your item.
+              </Text>
+
+              <View style={styles.labelList}>
+                {labels.map((label, index) => (
+                  <Pressable
+                    key={`${label.name}-${index}`}
+                    style={styles.labelButton}
+                    onPress={() => selectLabel(label)}
+                  >
+                    <Text style={styles.labelName}>
+                      {label.name}
+                    </Text>
+
+                    <Text style={styles.confidence}>
+                      {Math.round(label.confidence)}%
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              <Pressable
+                style={[styles.actionButton, styles.retakeButton]}
+                onPress={retakePhoto}
+              >
+                <Text style={styles.actionButtonText}>
+                  Retake
+                </Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+          <Modal
+            visible={isImageExpanded}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsImageExpanded(false)}
+          >
+            <View style={styles.imageModal}>
+              <Pressable
+                style={styles.closeImageButton}
+                onPress={() => setIsImageExpanded(false)}
+              >
+                <Ionicons name="close" size={30} color="white" />
+              </Pressable>
+
+              <Image
+                source={{ uri: photo?.uri }}
+                style={styles.expandedImage}
+                resizeMode="contain"
+              />
+            </View>
+          </Modal>
         </View>
       ) : photo ? (
         // ----------------------------------------
@@ -312,7 +348,8 @@ const styles = StyleSheet.create({
 
   resultImage: {
     width: "100%",
-    height: "35%",
+    height: 300,
+    backgroundColor: "#111"
   },
 
   resultsContent: {
@@ -384,5 +421,57 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+
+  resultsScroll: {
+    flex: 1
+  },
+
+  resultsScrollContent: {
+    paddingBottom: 30
+  },
+
+  expandHint: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8
+  },
+
+  expandHintText: {
+    color: "white",
+    marginLeft: 5,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  imageModal: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  expandedImage: {
+    width: "100%",
+    height: "100%"
+  },
+  
+  closeImageButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center"
   },
 });

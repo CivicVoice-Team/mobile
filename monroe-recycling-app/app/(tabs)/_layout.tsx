@@ -1,13 +1,16 @@
 import React from 'react';
+import { useEffect, useState } from 'react';
 
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs, useSegments } from 'expo-router';
+import { Tabs, useSegments, Href } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { TabIcon } from '@/components/tab-icon';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { SKILL_ID } from '@/constants/config';
+import { fetchLocations } from '@/services/locations';
 
 function createTabBarIcon(
   iconName: React.ComponentProps<typeof Ionicons>['name']
@@ -31,6 +34,38 @@ export default function TabLayout() {
   const segments = useSegments() as string[];
 
   const isLocationScreen = segments.includes("locations") || segments.includes("ecopark");
+
+  //const locationlink = SKILL_ID == "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d" ? '/locations/0' : '/ecopark';
+
+  const [firstLocationId, setFirstLocationId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadFirstLocation() {
+      try {
+        const locations = await fetchLocations(SKILL_ID);
+
+        if (locations.length > 0) {
+          setFirstLocationId(locations[0].location_id);
+        }
+      } catch (error) {
+        console.error("Failed to load locations", error);
+      }
+    }
+
+    loadFirstLocation();
+  }, []);
+
+  const locationlink: Href | null =
+    SKILL_ID === "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d"
+        ? firstLocationId
+            ? {
+                pathname: "/locations/[id]",
+                params: {
+                    id: firstLocationId,
+                },
+            }
+            : null
+        : "/ecopark";
 
   const TABS = [
         {
@@ -75,6 +110,9 @@ export default function TabLayout() {
           options={{
             title: tab.title,
             tabBarIcon: tab.tabBarIcon,
+            ...(tab.name === 'ecopark' && locationlink
+              ? { href: locationlink }
+              : {}),
           }}
         />
       ))}
