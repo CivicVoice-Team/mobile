@@ -73,13 +73,38 @@ export default function FAQSearchScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.container}
             ListHeaderComponent={
-                <TextInput
-                    style={styles.searchBar}
-                    placeholder='Search Items...'
-                    placeholderTextColor="#888"
-                    value={searchText}
-                    onChangeText={setSearchText}
-                />
+                <View style={styles.searchWrapper}>
+                    <TextInput
+                        style={styles.searchBar}
+                        placeholder='Search Items...'
+                        placeholderTextColor="#888"
+                        value={searchText}
+                        onChangeText={setSearchText}
+                    />
+
+                    {searchText.length > 0 && (
+                        <Pressable
+                            style={styles.clearButton}
+                            onPress={() => setSearchText("")}
+                            hitSlop={8}
+                        >
+                            <Ionicons name="close-circle" size={22} color="#888" />
+                        </Pressable>
+                    )}
+                </View>
+            }
+            ListEmptyComponent={
+                searchText.trim().length >= 2 ? (
+                    <View style={styles.noResultsContainer}>
+                        <Ionicons name="search-outline" size={48} color="#888" />
+                        <ThemedText style={styles.noResultsTitle}>
+                            No results found
+                        </ThemedText>
+                        <ThemedText style={styles.noResultsText}>
+                            We couldn't find any items matching "{searchText.trim()}". Try a different search.
+                        </ThemedText>
+                    </View>
+                ) : null
             }
             renderItem={({ item: faq }) => (
                 <Pressable
@@ -97,49 +122,39 @@ export default function FAQSearchScreen() {
                             },
                         })
                     }
-        >
-            <Image
-                source={{ uri: getFaqImageUrl(faq) }}
-                style={styles.image}
-                resizeMode="contain"
-            />
+                >
+                    <Image
+                        source={{ uri: getFaqImageUrl(faq) }}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
 
-            <View style={styles.textContainer}>
-                <ThemedText style={styles.question}>
-                    {faq.question.split(",")[0]}
-                </ThemedText>
+                    <View style={styles.textContainer}>
+                        <ThemedText style={styles.question}>
+                            {faq.question.split(",")[0]}
+                        </ThemedText>
 
-                {faq.hazardous && (
-                    <View style={styles.hazardBadge}>
-                        <Ionicons
-                            name="warning"
-                            size={14}
-                            color="white"
-                            style={{ marginRight: 4 }}
-                        />
-                        <ThemedText style={styles.hazardBadgeText}>
-                            Hazardous
+                        {faq.hazardous && (
+                            <View style={styles.hazardBadge}>
+                                <Ionicons
+                                    name="warning"
+                                    size={14}
+                                    color="white"
+                                    style={{ marginRight: 4 }}
+                                />
+                                <ThemedText style={styles.hazardBadgeText}>
+                                    Hazardous
+                                </ThemedText>
+                            </View>
+                        )}
+
+                        <ThemedText style={styles.readMore} numberOfLines={1} ellipsizeMode="tail">
+                            {faq.description}
                         </ThemedText>
                     </View>
-                )}
-
-                <ThemedText style={styles.readMore} numberOfLines={1} ellipsizeMode="tail">
-                    {faq.description}
-                </ThemedText>
-
-                {/* <View style={styles.tagContainer}>
-                    {faq.tags.slice(0, 3).map((tag, index) => (
-                        <View key={index} style={styles.tagPill}>
-                            <ThemedText style={styles.tagText}>
-                                {tag.name}
-                            </ThemedText>
-                        </View>
-                    ))}
-                </View> */}
-            </View>
-        </Pressable>
-    )}
-/>
+                </Pressable>
+            )}
+        />
     );
 }
 
@@ -193,8 +208,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 6,
-        marginBottom: 16,
-        fontSize: 16
+        paddingRight: 44,
+        fontSize: 16,
     },
 
     tagContainer: {
@@ -234,4 +249,38 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
     },
+
+    searchWrapper: {
+        position: "relative",
+        marginBottom: 16,
+        marginTop: 10
+    },
+
+    clearButton: {
+        position: "absolute",
+        right: 12,
+        top: "50%",
+        transform: [{ translateY: -11}]
+    },
+    
+    noResultsContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 30,
+        paddingTop: 50,
+    },
+
+    noResultsTitle: {
+        fontSize: 20,
+        fontWeight: "600",
+        marginTop: 12,
+        marginBottom: 6
+    },
+
+    noResultsText: {
+        color: "#888",
+        textAlign: "center",
+        fontSize: 15,
+        lineHeight: 22
+    }
 });
