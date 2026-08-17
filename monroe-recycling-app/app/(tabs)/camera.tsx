@@ -33,6 +33,7 @@ export default function Camera() {
   const [labels, setLabels] = useState<RekognitionLabel[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isImageExpanded, setIsImageExpanded] = useState(false);
+  const [isNotInListModalVisible, setIsNotInListModalVisible] = useState(false);
 
   if (!permission) {
     return (
@@ -133,6 +134,23 @@ export default function Camera() {
     setLabels([]);
   };
 
+  const handleNotInList = () => {
+    setIsNotInListModalVisible(true);
+  };
+
+  const retakeFromNotInList = () => {
+    setIsNotInListModalVisible(false);
+    setPhoto(null);
+    setLabels([]);
+  };
+
+  const searchManually = () => {
+    setIsNotInListModalVisible(false);
+    setPhoto(null);
+    setLabels([]);
+    router.push("/faq-search");
+  }
+
   return (
     <View style={styles.container}>
       {labels.length > 0 ? (
@@ -184,11 +202,11 @@ export default function Camera() {
               </View>
 
               <Pressable
-                style={[styles.actionButton, styles.retakeButton]}
-                onPress={retakePhoto}
+                style={[styles.actionButton, styles.notInListButton]}
+                onPress={handleNotInList}
               >
                 <Text style={styles.actionButtonText}>
-                  Retake
+                  My item isn't in this list
                 </Text>
               </Pressable>
             </View>
@@ -212,6 +230,51 @@ export default function Camera() {
                 style={styles.expandedImage}
                 resizeMode="contain"
               />
+            </View>
+          </Modal>
+          <Modal
+            visible={isNotInListModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsNotInListModalVisible(false)}
+          >
+            <View style={styles.choiceModalOverlay}>
+              <View style={styles.choiceModal}>
+                <Text style={styles.choiceModalTitle}>
+                  Item not found?
+                </Text>
+
+                <Text style={styles.choiceModalText}>
+                  You can retake the photo or search for your item manually.
+                </Text>
+
+                <Pressable
+                  style={[styles.modalActionButton, styles.useButton]}
+                  onPress={retakeFromNotInList}
+                >
+                  <Text style={styles.actionButtonText}>
+                    Retake Photo
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.modalActionButton, styles.searchButton]}
+                  onPress={searchManually}
+                >
+                  <Text style={styles.actionButtonText}>
+                    Search Manually
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.cancelButton}
+                  onPress={() => setIsNotInListModalVisible(false)}
+                >
+                  <Text style={styles.cancelButtonText}>
+                    Cancel
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           </Modal>
         </View>
@@ -474,4 +537,64 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
+
+  notInListButton: {
+    backgroundColor: "#456781",
+    marginTop: 10,
+    alignItems: "center"
+  },
+
+  choiceModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24
+  },
+
+  choiceModal: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 24
+  },
+
+  choiceModalTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#222",
+    marginBottom: 8
+  },
+
+  choiceModalText: {
+    fontSize: 15,
+    lineHeight: 21,
+    color: "#666",
+    marginBottom: 20
+  },
+
+  modalActionButton: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 10
+  },
+
+  searchButton: {
+    backgroundColor: "#456781"
+  },
+  
+  cancelButton: {
+    width: "100%",
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+
+  cancelButtonText: {
+    color: "#666",
+    fontSize: 16,
+    fontWeight: "600"
+  }
 });
