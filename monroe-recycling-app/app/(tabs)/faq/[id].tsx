@@ -37,7 +37,8 @@ export default function FAQDetail() {
         dollar: "cash",
         calendar: "calendar",
         clock: "time",
-        location: "location"
+        location: "location",
+        "information-circle": "information-circle"
     } as const;
 
     const getTagUrl = (tag: any) => {
