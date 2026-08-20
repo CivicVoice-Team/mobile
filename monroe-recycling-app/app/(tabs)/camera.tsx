@@ -18,6 +18,8 @@ import * as FileSystem from "expo-file-system";
 import { detectImage } from "@/services/rekognition";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { SKILL_ID } from "@/constants/config";
+import { saveImageSearch } from "@/services/saveImage";
 
 type RekognitionLabel = {
   name: string;
@@ -31,6 +33,7 @@ export default function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<CameraCapturedPicture | null>(null);
   const [labels, setLabels] = useState<RekognitionLabel[]>([]);
+  const [imageId, setImageId] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isImageExpanded, setIsImageExpanded] = useState(false);
   const [isNotInListModalVisible, setIsNotInListModalVisible] = useState(false);
@@ -98,6 +101,10 @@ export default function Camera() {
 
       console.log("Rekognition result:", result);
 
+      if (result.image_id) {
+        setImageId(result.image_id);
+      }
+
       // Store the top labels so we can display them to the user.
       if (result.labels && result.labels.length > 0) {
         setLabels(result.labels);
@@ -111,22 +118,43 @@ export default function Camera() {
     }
   };
 
-  const selectLabel = (label: RekognitionLabel) => {
-    console.log("Selected label:", label.name);
-    console.log("Confidence:", label.confidence);
+  const selectLabel = async (label: RekognitionLabel) => {
+    if (!imageId) {
+      console.error("No image ID available");
+      return;
+    }
 
-    // Clear the current photo/labels before navigating.
-    setPhoto(null);
-    setLabels([]);
+    try {
+      setIsCapturing(true);
 
-    // Use the user's selected Rekognition label
-    // as the search term.
-    router.push({
-      pathname: "/faq-search",
-      params: {
-        query: label.name,
-      },
-    });
+      const skillId = SKILL_ID;
+
+      const keywords = labels.map((item) => item.name);
+
+      await saveImageSearch({
+        skillId,
+        imageId,
+        keywords,
+        selectedKeyword: label.name,
+      });
+
+      console.log("Image search saved");
+
+      setPhoto(null);
+      setLabels([]);
+      setImageId(null);
+
+      router.push({
+        pathname: "/faq-search",
+        params: {
+          query: label.name,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to save image search:", err);
+    } finally {
+      setIsCapturing(false);
+    }
   };
 
   const retakePhoto = () => {
