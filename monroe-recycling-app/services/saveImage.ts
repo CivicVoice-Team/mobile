@@ -4,11 +4,13 @@ const SAVE_IMAGE_SEARCH_ENDPOINT =
 export async function saveImageSearch({
     skillId,
     imageId,
+    imageKey,
     keywords,
     selectedKeyword,
 }: {
     skillId: string;
     imageId: string;
+    imageKey: string;
     keywords: string[];
     selectedKeyword: string;
 }) {
@@ -20,6 +22,7 @@ export async function saveImageSearch({
         body: JSON.stringify({
             skill_id: skillId,
             image_id: imageId,
+            image_key: imageKey,
             keywords,
             selected_keyword: selectedKeyword,
         }),

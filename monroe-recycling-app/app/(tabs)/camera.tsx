@@ -34,6 +34,7 @@ export default function Camera() {
   const [photo, setPhoto] = useState<CameraCapturedPicture | null>(null);
   const [labels, setLabels] = useState<RekognitionLabel[]>([]);
   const [imageId, setImageId] = useState<string | null>(null);
+  const [imageKey, setImageKey] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isImageExpanded, setIsImageExpanded] = useState(false);
   const [isNotInListModalVisible, setIsNotInListModalVisible] = useState(false);
@@ -105,6 +106,10 @@ export default function Camera() {
         setImageId(result.image_id);
       }
 
+      if (result.image_key) {
+        setImageKey(result.image_key);
+      }
+
       // Store the top labels so we can display them to the user.
       if (result.labels && result.labels.length > 0) {
         setLabels(result.labels);
@@ -119,7 +124,7 @@ export default function Camera() {
   };
 
   const selectLabel = async (label: RekognitionLabel) => {
-    if (!imageId) {
+    if (!imageId || !imageKey) {
       console.error("No image ID available");
       return;
     }
@@ -134,6 +139,7 @@ export default function Camera() {
       await saveImageSearch({
         skillId,
         imageId,
+        imageKey,
         keywords,
         selectedKeyword: label.name,
       });
@@ -143,6 +149,7 @@ export default function Camera() {
       setPhoto(null);
       setLabels([]);
       setImageId(null);
+      setImageKey(null);
 
       router.push({
         pathname: "/faq-search",
