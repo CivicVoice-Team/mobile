@@ -5,8 +5,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
-import { Pressable, Text} from 'react-native';
+import { Pressable, Text, Modal} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 
 
 import { Switch } from 'react-native';
@@ -14,6 +15,7 @@ import { useThemeContext } from '@/contexts/theme-context';
 
 export default function Profile() {
   const { theme, toggleTheme } = useThemeContext();
+  const [themeModalVisible, setThemeModalVisible] = useState(false);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -46,17 +48,22 @@ export default function Profile() {
       <MyButton
         title="Theme"
         icon="contrast-outline"
-        onPress={() => console.log("Theme")}
+        onPress={() => setThemeModalVisible(true)}
       />
       </ThemedView>
 
-      <ThemedView style={styles.titleContainer}>
-      <MyButton
-        title="Help"
-        icon="help-circle-outline"
-        onPress={() => console.log("Help")}
-      />
-      </ThemedView>
+      <Modal
+  visible={themeModalVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={() => setThemeModalVisible(false)}
+>
+  <ThemedView style={styles.modalBackground}>
+    <ThemedView style={styles.modalBox}>
+
+      <ThemedText type="subtitle">
+        Theme
+      </ThemedText>
 
       <ThemedView style={styles.settingRow}>
         <ThemedText>Dark Mode</ThemedText>
@@ -66,6 +73,26 @@ export default function Profile() {
           onValueChange={toggleTheme}
         />
       </ThemedView>
+
+      <Pressable
+        style={styles.closeButton}
+        onPress={() => setThemeModalVisible(false)}
+      >
+        <Text style={styles.closeButtonText}>Close</Text>
+      </Pressable>
+
+    </ThemedView>
+  </ThemedView>
+</Modal>
+
+      <ThemedView style={styles.titleContainer}>
+      <MyButton
+        title="Help"
+        icon="help-circle-outline"
+        onPress={() => console.log("Help")}
+      />
+      </ThemedView>
+
 
     </ParallaxScrollView>
   );
@@ -126,4 +153,27 @@ buttonText: {
   marginLeft: 10,
   fontWeight: "bold",
 },
+modalBackground:{
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.5)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+modalBox:{
+  width: "85%",
+  padding: 20,
+  borderRadius: 15,
+},
+closeButton:{
+  backgroundColor: "#58ADE0",
+  padding: 12,
+  borderRadius: 10,
+  alignItems: "center",
+  marginTop: 20,
+},
+  closeButtonText:{
+    color: "#12304A",
+    fontWeight: "bold",
+    fontSize: 16,
+  }
 });
