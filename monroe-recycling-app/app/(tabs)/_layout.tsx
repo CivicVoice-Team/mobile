@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useSegments, Href } from 'expo-router';
+import { type ColorValue } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { TabIcon } from '@/components/tab-icon';
@@ -12,7 +13,7 @@ function createTabBarIcon(
   iconName: React.ComponentProps<typeof Ionicons>['name']
 ) {
   return function TabBarIcon(props: {
-    color: string;
+    color: ColorValue;
     size: number;
     focused: boolean;
   }) {
@@ -65,7 +66,7 @@ export default function TabLayout() {
   const TABS = [
         {
             name: 'camera',
-            title: 'Camera',
+            title: 'Search',
             tabBarIcon: createTabBarIcon('search')
         },
         {
@@ -108,6 +109,9 @@ export default function TabLayout() {
           options={{
             title: tab.title,
             tabBarIcon: tab.tabBarIcon,
+            ...(tab.name === 'camera'
+              ? { href: '/faq-search' }
+              : {}),
             ...(tab.name === 'ecopark' && locationlink
               ? { href: locationlink }
               : {}),

@@ -49,7 +49,11 @@
         {
           "cameraPermission": "Allow this app to use your camera to identify recyclable items."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

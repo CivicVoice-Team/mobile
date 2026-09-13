@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, type ColorValue } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSegments } from "expo-router";
 
 type TabIconProps = Readonly<{
     name: React.ComponentProps<typeof Ionicons>['name'];
-    color: string;
+    color: ColorValue;
     size: number;
     focused: boolean;
 }>;

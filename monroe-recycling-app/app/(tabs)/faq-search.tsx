@@ -73,26 +73,44 @@ export default function FAQSearchScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.container}
             ListHeaderComponent={
-                <View style={styles.searchWrapper}>
-                    <TextInput
-                        style={styles.searchBar}
-                        placeholder='Search Items...'
-                        placeholderTextColor="#888"
-                        value={searchText}
-                        onChangeText={setSearchText}
-                    />
+                <>
+    <View style={styles.searchWrapper}>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search waste materials..."
+        placeholderTextColor="#D7DCE2"
+        value={searchText}
+        onChangeText={setSearchText}
+      />
 
-                    {searchText.length > 0 && (
-                        <Pressable
-                            style={styles.clearButton}
-                            onPress={() => setSearchText("")}
-                            hitSlop={8}
-                        >
-                            <Ionicons name="close-circle" size={22} color="#888" />
-                        </Pressable>
-                    )}
+      <Ionicons
+        name="mic"
+        size={20}
+        color="#FFFFFF"
+        style={styles.micIcon}
+      />
+    </View>
+
+                {searchText.trim().length === 0 && (
+                <View style={styles.cameraPrompt}>
+                    <ThemedText style={styles.instructions}>
+                    Before visiting alternate drop-off locations, confirm availability
+                    and hours of operation.
+                    </ThemedText>
+
+                    <Pressable
+                    style={styles.cameraButton}
+                    onPress={() => router.push('/camera')}>
+                    <Ionicons name="camera" size={40} color="#FFFFFF" />
+                    </Pressable>
+
+                    <ThemedText style={styles.cameraText}>
+                    Not sure what your waste item is? Scan with our AI camera feature!
+                    </ThemedText>
                 </View>
-            }
+                )}
+                </>
+                }
             ListEmptyComponent={
                 searchText.trim().length >= 2 ? (
                     <View style={styles.noResultsContainer}>
@@ -161,11 +179,12 @@ export default function FAQSearchScreen() {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        paddingTop: 100
+        paddingTop: 100,
+        backgroundColor: "#202223",
     },
 
     card: {
-        backgroundColor: "#456781",
+        backgroundColor: "#58ADE0",
         padding: 14,
         borderRadius: 12,
         marginBottom: 12,
@@ -179,22 +198,23 @@ const styles = StyleSheet.create({
     },
 
     question: {
-        color: "#fff",
-        fontWeight: "600",
-        marginBottom: 6,
+        color: "#1230$A",
+        fontWeight: "700",
+        marginBottom: 2,
     },
 
     readMore: {
-        color: "#fff",
-        //textDecorationLine: "underline",
+        color: "#12304A",
+        fontSize:11,
+        textDecorationLine: "underline",
     },
 
     image: {
-        width: 80,
-        aspectRatio: 1,
-        borderRadius: 8,
+        width: 62,
+        height: 52,
+        borderRadius: 10,
         marginRight: 12,
-        alignSelf: "flex-start"
+        backgroundColor: "#1230$A",
     },
 
     textContainer: {
@@ -202,14 +222,49 @@ const styles = StyleSheet.create({
     },
 
     searchBar: {
-        backgroundColor: "transparent",
         borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 6,
+        borderColor: "#D7DCE2",
+        borderRadius: 20,
+        color: "#FFFFFF",
+        paddingHorizontal: 14,
+        paddingVertical: 9,
         paddingRight: 44,
-        fontSize: 16,
+    },
+
+    micIcon:{
+        position: 'absolute',
+        right: 14,
+        top: 10,
+    },
+
+    cameraPrompt:{
+        alignItems: 'center',
+        marginBottom: 18,
+    },
+
+    instructions: {
+        color: "#FFFFFF",
+        fontWeight: "600",
+        textAlign: "center",
+        fontSize: 13,
+        lineHeight: 18,
+    },
+
+    cameraButton: {
+        width: 84,
+        height: 84,
+        borderRadius: 42,
+        backgroundColor: "#187843",
+        alignItems: "center",
+        justifyContent: 'center',
+        marginVertical: 16,
+    },
+
+    cameraText:{
+        color: "#E7EEF4",
+        fontSize: 12,
+        lineHeight: 18,
+        textAlign: 'center',
     },
 
     tagContainer: {
