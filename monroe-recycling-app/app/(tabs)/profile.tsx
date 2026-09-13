@@ -5,6 +5,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
+import { Pressable, Text} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
 
 import { Switch } from 'react-native';
 import { useThemeContext } from '@/contexts/theme-context';
@@ -27,17 +30,33 @@ export default function Profile() {
         <ThemedText
           type="title"
           style={{ fontFamily: Fonts.rounded }}>
-          Profile
+          Settings
         </ThemedText>
       </ThemedView>
 
-      <ThemedText>
-        This is a placeholder for the profile page.
-      </ThemedText>
+      <ThemedView style={styles.titleContainer}>
+      <MyButton
+        title="Language"
+        icon="globe-outline"
+        onPress={() => console.log("Language")}
+      />
+      </ThemedView>
 
-      <ThemedText>
-        Content and features will be added here soon.
-      </ThemedText>
+      <ThemedView style={styles.titleContainer}>
+      <MyButton
+        title="Theme"
+        icon="contrast-outline"
+        onPress={() => console.log("Theme")}
+      />
+      </ThemedView>
+
+      <ThemedView style={styles.titleContainer}>
+      <MyButton
+        title="Help"
+        icon="help-circle-outline"
+        onPress={() => console.log("Help")}
+      />
+      </ThemedView>
 
       <ThemedView style={styles.settingRow}>
         <ThemedText>Dark Mode</ThemedText>
@@ -51,6 +70,28 @@ export default function Profile() {
     </ParallaxScrollView>
   );
 }
+
+export function MyButton({ title, icon, onPress }: {
+  title: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      style={styles.button}
+      onPress={onPress}
+    >
+      <Ionicons
+        name={icon}
+        size={20}
+        color="#12304A"
+      />
+
+      <Text style={styles.buttonText}>{title}</Text>
+    </Pressable>
+  );
+}
+  
 
 const styles = StyleSheet.create({
   headerImage: {
@@ -68,4 +109,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  button: {
+  backgroundColor: '#58ADE0',
+  borderRadius: 10,
+  paddingHorizontal: 12,
+  height: 45,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: "flex-start",
+  marginBottom: 15,
+  width: "100%",
+},
+buttonText: {
+  color: '#12304A',
+  fontSize: 16,
+  marginLeft: 10,
+  fontWeight: "bold",
+},
 });

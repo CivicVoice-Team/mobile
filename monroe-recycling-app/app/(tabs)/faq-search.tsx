@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     },
 
     question: {
-        color: "#1230$A",
+        color: "#12304A",
         fontWeight: "700",
         marginBottom: 2,
     },
