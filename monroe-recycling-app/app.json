@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.teamcivicvoice.monroecountyrecycling",
+      "bundleIdentifier": "us.civicvoice.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
