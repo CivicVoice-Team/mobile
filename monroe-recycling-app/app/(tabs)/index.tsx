@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HelloWave } from '@/components/hello-wave';
@@ -35,10 +35,25 @@ type NotificationItem = {
   state?: string;
 }
 
+type CalendarItem = {
+  event_id: string;
+  title: string;
+  start: string;
+  end: string;
+  all_day: boolean;
+  desc: string;
+  loc: string;
+  modified?: string;
+  keywords: string;
+  skill_id: string;
+}
+
 export default function HomeScreen() {
   const [mobileContent, setMobileContent] = useState<Record<string, string>>({});
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [topNotification, setTopNotification] = useState<NotificationItem | null>(null);
+  const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadContent() {
@@ -87,6 +102,26 @@ export default function HomeScreen() {
       } catch (err) {
         console.error("News fetch failed:", err);
       }
+
+
+      // Calendar Content
+
+      try{
+        const events = await fetchCalendar(SKILL_ID);
+
+        const upcomingEvents = events
+        .filter((event) => new Date(event.end) >= new Date())
+        .sort(
+          (a, b) =>
+            new Date(a.start).getTime() - new Date(b.start).getTime()
+        );
+
+        setCalendarItems(upcomingEvents);
+
+      } catch (err) {
+        console.error("Calendar fetch failed:", err);
+      }
+      
     }
 
     loadContent();
@@ -124,6 +159,23 @@ export default function HomeScreen() {
     return res.json();
   }
 
+
+  async function fetchCalendar(skill_id: string): Promise<CalendarItem[]> {
+  const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/get_calendar?skill_id=${encodeURIComponent(skill_id)}`;
+
+  const res = await fetch(url);
+
+  if (!res.ok) {
+  const body = await res.text();
+  console.log("Calendar error:", res.status, body);
+  throw new Error(`Failed to fetch calendar: ${res.status}`);
+}
+
+
+  return res.json();
+}
+
+
   function getLastYearNews(items: NewsItem[]) {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -133,6 +185,15 @@ export default function HomeScreen() {
       return new Date(item.date) >= oneYearAgo;
     }).sort((a, b) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+  }
+
+  function formatEventTime(event: CalendarItem) {
+    if (event.all_day) return 'All day';
+
+    return new Date(event.start).toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
     });
   }
 
@@ -152,7 +213,7 @@ export default function HomeScreen() {
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.headerText}>News & Announcements</ThemedText>
+        <ThemedText type="title" style={styles.headerText}>Annoucements</ThemedText>
       </ThemedView>
 
       {/* <ThemedView style={[styles.card, styles.blueCard]}>
@@ -174,11 +235,81 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
 
+      <ThemedView style={styles.titleContainer}>
+  <ThemedText type="title" style={styles.headerText}>
+      Upcoming Events
+  </ThemedText>
+    </ThemedView>
+
+      {calendarItems.map((event) => {
+        const startDate = new Date(event.start);
+        const isExpanded = expandedEventId === event.event_id;
+
+        return (
+          <Pressable
+            key={event.event_id}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: isExpanded }}
+            accessibilityHint="Shows more event details"
+            onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
+            style={({ pressed }) => [
+              styles.eventCard,
+              pressed && styles.eventCardPressed,
+            ]}>
+            <ThemedView style={styles.eventDateBadge} lightColor="#DDF3E7" darkColor="#DDF3E7">
+              <ThemedText style={styles.eventMonth} lightColor="#27704D" darkColor="#27704D">
+                {startDate.toLocaleDateString([], { month: 'short' })}
+              </ThemedText>
+              <ThemedText style={styles.eventDay} lightColor="#27704D" darkColor="#27704D">
+                {startDate.getDate()}
+              </ThemedText>
+            </ThemedView>
+
+            <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
+              <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
+                {event.title}
+              </ThemedText>
+              <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+                {formatEventTime(event)}{event.loc ? ` · ${event.loc}` : ''}
+              </ThemedText>
+
+              {isExpanded && (
+                <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
+                  {event.desc ? (
+                    <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
+                      {event.desc}
+                    </ThemedText>
+                  ) : null}
+                  {!event.all_day ? (
+                    <ThemedText style={styles.eventEndTime} lightColor="#12304A" darkColor="#12304A">
+                      Ends {new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                    </ThemedText>
+                  ) : null}
+                </ThemedView>
+              )}
+            </ThemedView>
+
+            <Ionicons
+              name={isExpanded ? 'chevron-up' : 'chevron-down'}
+              size={21}
+              color="#12304A"
+              style={styles.eventChevron}
+            />
+          </Pressable>
+        );
+      })}
+
       {/* <ThemedView style={styles.divider} /> */}
 
       {/* <ThemedView style={styles.titleContainer}>
         <ThemedText type="title" style={styles.headerText}>News</ThemedText>
       </ThemedView> */}
+
+      <ThemedView style={styles.titleContainer}>
+    <ThemedText type="title" style={styles.headerText}>
+      News
+    </ThemedText>
+      </ThemedView> 
 
       {newsItems.map((item) => {
         const imageUrl = item.video_url?.[0];
@@ -289,5 +420,86 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     flex: 1,
+  },
+
+  eventCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#58ADE0',
+    borderRadius: 12,
+    marginBottom: 10,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+
+  eventCardPressed: {
+    opacity: 0.82,
+  },
+
+  eventDateBadge: {
+    alignItems: 'center',
+    borderRadius: 8,
+    margin: 10,
+    minWidth: 54,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+
+  eventMonth: {
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 16,
+    textTransform: 'uppercase',
+  },
+
+  eventDay: {
+    fontSize: 26,
+    fontWeight: '700',
+    lineHeight: 29,
+  },
+
+  eventSummary: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingRight: 32,
+  },
+
+  eventTitle: {
+    fontSize: 16,
+    lineHeight: 20,
+  },
+
+  eventMeta: {
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 2,
+  },
+
+  eventChevron: {
+    position: 'absolute',
+    right: 10,
+    top: 18,
+  },
+
+  eventDetails: {
+    borderTopColor: 'rgba(18, 48, 74, 0.28)',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 10,
+    paddingTop: 9,
+  },
+
+  eventDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  eventEndTime: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 8,
   }
 });

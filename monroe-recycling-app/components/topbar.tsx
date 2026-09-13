@@ -19,7 +19,7 @@ export default function TopBar({ title = 'Monroe County Recycling',}: TopBarProp
             <View style={styles.inner}>
                 <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity onPress={() => router.push('/faq-search')} activeOpacity={0.7}>
-                    <Ionicons name="search" size={22} color="white" />
+                    <Ionicons name="settings" size={22} color="white" />
                 </TouchableOpacity>
             </View>
         </View>

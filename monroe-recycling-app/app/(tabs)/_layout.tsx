@@ -1,14 +1,10 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useSegments, Href } from 'expo-router';
-import { StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { TabIcon } from '@/components/tab-icon';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SKILL_ID } from '@/constants/config';
 import { fetchLocations } from '@/services/locations';
 
@@ -30,7 +26,6 @@ function createTabBarIcon(
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const segments = useSegments() as string[];
 
   const isLocationScreen = segments.includes("locations") || segments.includes("ecopark");
@@ -71,7 +66,7 @@ export default function TabLayout() {
         {
             name: 'camera',
             title: 'Camera',
-            tabBarIcon: createTabBarIcon('camera')
+            tabBarIcon: createTabBarIcon('search')
         },
         {
             name: 'index',
@@ -83,11 +78,6 @@ export default function TabLayout() {
             title: 'Ecopark',
             tabBarIcon: createTabBarIcon('leaf')
         },
-        {
-            name: 'profile',
-            title: 'Profile',
-            tabBarIcon: createTabBarIcon('person')
-        }
     ] as const;
 
   return (
@@ -96,11 +86,19 @@ export default function TabLayout() {
       initialRouteName='index'
       backBehavior='history'
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#FFFFFF',
+        tabBarInactiveTintColor: '#FFFFFF',
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarButton: HapticTab,
         tabBarStyle: { 
-          backgroundColor: isLocationScreen ? "#2E623C" : "#152e70", 
+          backgroundColor: isLocationScreen ? "#2E623C" : "#19549A",
+          borderTopWidth: 0,
+          height: 70,
+          paddingTop: 7,
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center',
         },
       }}>
       {TABS.map(tab => (
@@ -140,35 +138,12 @@ export default function TabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  iconContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  activeIconContainer: {
-    backgroundColor: '#152e70',
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-
-    marginTop: -18,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    // shadowColor: '#000',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.25,
-    // shadowRadius: 4,
-
-    //elevation: 5,
-  },
-});
