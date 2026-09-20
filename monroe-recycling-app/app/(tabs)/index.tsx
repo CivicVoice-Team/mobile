@@ -7,7 +7,7 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { fetchMobileContent } from '@/services/mobileContent'
 import { SKILL_ID } from '@/constants/config';
 
@@ -80,6 +80,7 @@ function EventCard({
 }) {
   const startDate = new Date(event.start);
   const [stackTitle, setStackTitle] = useState(false);
+  const cardWidthRef = useRef(0);
   const timeLabel = event.all_day
     ? 'All day'
     : `${formatClock(event.start)} - ${formatClock(event.end)}`;
@@ -95,7 +96,17 @@ function EventCard({
   );
 
   return (
-    <ThemedView style={styles.eventCard} lightColor="#58ADE0" darkColor="#58ADE0">
+    <ThemedView
+      style={styles.eventCard}
+      lightColor="#58ADE0"
+      darkColor="#58ADE0"
+      onLayout={(e) => {
+        const width = Math.round(e.nativeEvent.layout.width);
+        if (cardWidthRef.current !== 0 && width !== cardWidthRef.current) {
+          setStackTitle(false);
+        }
+        cardWidthRef.current = width;
+      }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
@@ -139,13 +150,10 @@ function EventCard({
                 style={styles.eventTitleMeasure}
                 lightColor="#12304A"
                 darkColor="#12304A"
-                onLayout={(e) => {
-                  const wraps = e.nativeEvent.layout.height > EVENT_TITLE_LINE_HEIGHT * 1.5;
-                  setStackTitle((prev) => (prev === wraps ? prev : wraps));
-                }}
                 onTextLayout={(e) => {
-                  const wraps = e.nativeEvent.lines.length > 1;
-                  setStackTitle((prev) => (prev === wraps ? prev : wraps));
+                  if (e.nativeEvent.lines.length > 1) {
+                    setStackTitle((prev) => (prev ? prev : true));
+                  }
                 }}>
                 {event.title}
               </ThemedText>
@@ -167,7 +175,9 @@ function EventCard({
             </ThemedText>
           </ThemedView>
 
-          {stackTitle ? null : chevron}
+          <View style={styles.eventChevronSlot}>
+            {stackTitle ? null : chevron}
+          </View>
         </ThemedView>
       </Pressable>
 
@@ -619,8 +629,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
+  eventChevronSlot: {
+    width: 31,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   eventChevron: {
-    marginRight: 10,
     marginTop: 1,
   },
 
