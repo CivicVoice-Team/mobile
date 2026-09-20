@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Linking, Pressable, StyleSheet } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HelloWave } from '@/components/hello-wave';
@@ -10,6 +10,8 @@ import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { fetchMobileContent } from '@/services/mobileContent'
 import { SKILL_ID } from '@/constants/config';
+
+const EVENT_TITLE_LINE_HEIGHT = 20;
 
 const EVENT_DATE_GREEN = '#DDF3E7';
 const EVENT_DATE_GREEN_TEXT = '#27704D';
@@ -51,6 +53,150 @@ type CalendarItem = {
   skill_id: string;
   link_url?: string;
   link_button?: string;
+}
+
+function formatClock(value: string) {
+  return new Date(value).toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+function openEventLink(url?: string) {
+  const trimmed = url?.trim();
+  if (!trimmed) return;
+  const href = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  Linking.openURL(href);
+}
+
+function EventCard({
+  event,
+  isExpanded,
+  onToggle,
+}: {
+  event: CalendarItem;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const startDate = new Date(event.start);
+  const [stackTitle, setStackTitle] = useState(false);
+  const timeLabel = event.all_day
+    ? 'All day'
+    : `${formatClock(event.start)} - ${formatClock(event.end)}`;
+  const accessibilityLabel = [event.title, event.loc, timeLabel].filter(Boolean).join(', ');
+
+  const chevron = (
+    <Ionicons
+      name={isExpanded ? 'chevron-up' : 'chevron-down'}
+      size={21}
+      color="#12304A"
+      style={styles.eventChevron}
+    />
+  );
+
+  return (
+    <ThemedView style={styles.eventCard} lightColor="#58ADE0" darkColor="#58ADE0">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ expanded: isExpanded }}
+        accessibilityHint="Shows more event details"
+        onPress={onToggle}
+        style={({ pressed }) => [
+          styles.eventCardHeader,
+          pressed && styles.eventCardPressed,
+        ]}>
+        {stackTitle ? (
+          <ThemedView style={styles.eventTitleRow} lightColor="#58ADE0" darkColor="#58ADE0">
+            <ThemedText type="defaultSemiBold" style={styles.eventTitleStacked} lightColor="#12304A" darkColor="#12304A">
+              {event.title}
+            </ThemedText>
+            {chevron}
+          </ThemedView>
+        ) : null}
+
+        <ThemedView style={styles.eventBodyRow} lightColor="#58ADE0" darkColor="#58ADE0">
+          <ThemedView style={styles.eventDateBadge} lightColor={EVENT_DATE_GREEN} darkColor={EVENT_DATE_GREEN}>
+            <ThemedText style={styles.eventMonth} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+              {startDate.toLocaleDateString([], { month: 'short' })}
+            </ThemedText>
+            <ThemedText style={styles.eventDay} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+              {startDate.getDate()}
+            </ThemedText>
+          </ThemedView>
+
+          <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
+            <View
+              pointerEvents="none"
+              accessible={false}
+              accessibilityElementsHidden
+              importantForAccessibility="no"
+              style={styles.eventTitleMeasureWrap}>
+              <ThemedText
+                type="defaultSemiBold"
+                accessible={false}
+                importantForAccessibility="no"
+                style={styles.eventTitleMeasure}
+                lightColor="#12304A"
+                darkColor="#12304A"
+                onLayout={(e) => {
+                  const wraps = e.nativeEvent.layout.height > EVENT_TITLE_LINE_HEIGHT * 1.5;
+                  setStackTitle((prev) => (prev === wraps ? prev : wraps));
+                }}
+                onTextLayout={(e) => {
+                  const wraps = e.nativeEvent.lines.length > 1;
+                  setStackTitle((prev) => (prev === wraps ? prev : wraps));
+                }}>
+                {event.title}
+              </ThemedText>
+            </View>
+            {stackTitle ? null : (
+              <ThemedText type="defaultSemiBold" style={styles.eventTitleInline} lightColor="#12304A" darkColor="#12304A">
+                {event.title}
+              </ThemedText>
+            )}
+            {event.loc ? (
+              <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+                {event.loc}
+              </ThemedText>
+            ) : null}
+            <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+              {event.all_day
+                ? 'All day'
+                : `${formatClock(event.start)} - ${formatClock(event.end)}`}
+            </ThemedText>
+          </ThemedView>
+
+          {stackTitle ? null : chevron}
+        </ThemedView>
+      </Pressable>
+
+      {isExpanded && (event.desc || event.link_button?.trim()) ? (
+        <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
+          {event.desc ? (
+            <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
+              {event.desc}
+            </ThemedText>
+          ) : null}
+          {event.link_button?.trim() ? (
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel={event.link_button.trim()}
+              onPress={() => openEventLink(event.link_url)}
+              style={({ pressed }) => [
+                styles.eventLinkButton,
+                pressed && styles.eventLinkButtonPressed,
+              ]}
+            >
+              <ThemedText style={styles.eventLinkButtonText} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+                {event.link_button.trim()}
+              </ThemedText>
+            </Pressable>
+          ) : null}
+        </ThemedView>
+      ) : null}
+    </ThemedView>
+  );
 }
 
 export default function HomeScreen() {
@@ -193,23 +339,10 @@ export default function HomeScreen() {
     });
   }
 
-  function formatClock(value: string) {
-    return new Date(value).toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  }
-
-  function openEventLink(url?: string) {
-    const trimmed = url?.trim();
-    if (!trimmed) return;
-    const href = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-    Linking.openURL(href);
-  }
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}
+      contentStyle={styles.feedContent}
       headerImage={
         <Image
           source={
@@ -251,81 +384,16 @@ export default function HomeScreen() {
   </ThemedText>
     </ThemedView>
 
-      {calendarItems.map((event) => {
-        const startDate = new Date(event.start);
-        const isExpanded = expandedEventId === event.event_id;
-
-        return (
-          <ThemedView key={event.event_id} style={styles.eventCard} lightColor="#58ADE0" darkColor="#58ADE0">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: isExpanded }}
-              accessibilityHint="Shows more event details"
-              onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
-              style={({ pressed }) => [
-                styles.eventCardHeader,
-                pressed && styles.eventCardPressed,
-              ]}>
-              <ThemedView style={styles.eventDateBadge} lightColor={EVENT_DATE_GREEN} darkColor={EVENT_DATE_GREEN}>
-                <ThemedText style={styles.eventMonth} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
-                  {startDate.toLocaleDateString([], { month: 'short' })}
-                </ThemedText>
-                <ThemedText style={styles.eventDay} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
-                  {startDate.getDate()}
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
-                <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
-                  {event.title}
-                </ThemedText>
-                {event.loc ? (
-                  <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
-                    {event.loc}
-                  </ThemedText>
-                ) : null}
-                <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
-                  {event.all_day
-                    ? 'All day'
-                    : `${formatClock(event.start)} - ${formatClock(event.end)}`}
-                </ThemedText>
-              </ThemedView>
-
-              <Ionicons
-                name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                size={21}
-                color="#12304A"
-                style={styles.eventChevron}
-              />
-            </Pressable>
-
-            {isExpanded && (event.desc || event.link_button?.trim()) ? (
-              <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
-                {event.desc ? (
-                  <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
-                    {event.desc}
-                  </ThemedText>
-                ) : null}
-                {event.link_button?.trim() ? (
-                  <Pressable
-                    accessibilityRole="link"
-                    accessibilityLabel={event.link_button.trim()}
-                    onPress={() => openEventLink(event.link_url)}
-                    style={({ pressed }) => [
-                      styles.eventLinkButton,
-                      pressed && styles.eventLinkButtonPressed,
-                    ]}
-                  >
-                    <ThemedText style={styles.eventLinkButtonText} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
-                      {event.link_button.trim()}
-                    </ThemedText>
-                  </Pressable>
-                ) : null}
-              </ThemedView>
-            ) : null}
-          </ThemedView>
-        );
-      })}
+      {calendarItems.map((event) => (
+        <EventCard
+          key={event.event_id}
+          event={event}
+          isExpanded={expandedEventId === event.event_id}
+          onToggle={() =>
+            setExpandedEventId(expandedEventId === event.event_id ? null : event.event_id)
+          }
+        />
+      ))}
 
       {/* <ThemedView style={styles.divider} /> */}
 
@@ -362,6 +430,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  feedContent: {
+    paddingHorizontal: 16,
+  },
+
   titleContainer: {
     paddingVertical: 10
   },
@@ -463,12 +535,25 @@ const styles = StyleSheet.create({
   },
 
   eventCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'stretch',
   },
 
   eventCardPressed: {
     opacity: 0.82,
+  },
+
+  eventTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingLeft: 12,
+    paddingRight: 8,
+    paddingTop: 10,
+  },
+
+  eventBodyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   eventDateBadge: {
@@ -496,12 +581,36 @@ const styles = StyleSheet.create({
   eventSummary: {
     flex: 1,
     paddingVertical: 12,
-    paddingRight: 32,
+    paddingRight: 8,
+    position: 'relative',
   },
 
-  eventTitle: {
+  eventTitleInline: {
     fontSize: 16,
-    lineHeight: 20,
+    lineHeight: EVENT_TITLE_LINE_HEIGHT,
+    textAlign: 'left',
+  },
+
+  eventTitleStacked: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: EVENT_TITLE_LINE_HEIGHT,
+    textAlign: 'left',
+    paddingRight: 8,
+  },
+
+  eventTitleMeasureWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    opacity: 0,
+  },
+
+  eventTitleMeasure: {
+    fontSize: 16,
+    lineHeight: EVENT_TITLE_LINE_HEIGHT,
+    fontWeight: '600',
   },
 
   eventMeta: {
@@ -511,9 +620,8 @@ const styles = StyleSheet.create({
   },
 
   eventChevron: {
-    position: 'absolute',
-    right: 10,
-    top: 18,
+    marginRight: 10,
+    marginTop: 1,
   },
 
   eventDetails: {
