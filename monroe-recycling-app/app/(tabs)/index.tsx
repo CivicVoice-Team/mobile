@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { Linking, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HelloWave } from '@/components/hello-wave';
@@ -10,6 +10,9 @@ import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { fetchMobileContent } from '@/services/mobileContent'
 import { SKILL_ID } from '@/constants/config';
+
+const EVENT_DATE_GREEN = '#DDF3E7';
+const EVENT_DATE_GREEN_TEXT = '#27704D';
 
 type MobileContentItem = {
   field_id: string;
@@ -46,6 +49,8 @@ type CalendarItem = {
   modified?: string;
   keywords: string;
   skill_id: string;
+  link_url?: string;
+  link_button?: string;
 }
 
 export default function HomeScreen() {
@@ -188,13 +193,18 @@ export default function HomeScreen() {
     });
   }
 
-  function formatEventTime(event: CalendarItem) {
-    if (event.all_day) return 'All day';
-
-    return new Date(event.start).toLocaleTimeString([], {
+  function formatClock(value: string) {
+    return new Date(value).toLocaleTimeString([], {
       hour: 'numeric',
       minute: '2-digit',
     });
+  }
+
+  function openEventLink(url?: string) {
+    const trimmed = url?.trim();
+    if (!trimmed) return;
+    const href = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    Linking.openURL(href);
   }
 
   return (
@@ -246,56 +256,74 @@ export default function HomeScreen() {
         const isExpanded = expandedEventId === event.event_id;
 
         return (
-          <Pressable
-            key={event.event_id}
-            accessibilityRole="button"
-            accessibilityState={{ expanded: isExpanded }}
-            accessibilityHint="Shows more event details"
-            onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
-            style={({ pressed }) => [
-              styles.eventCard,
-              pressed && styles.eventCardPressed,
-            ]}>
-            <ThemedView style={styles.eventDateBadge} lightColor="#DDF3E7" darkColor="#DDF3E7">
-              <ThemedText style={styles.eventMonth} lightColor="#27704D" darkColor="#27704D">
-                {startDate.toLocaleDateString([], { month: 'short' })}
-              </ThemedText>
-              <ThemedText style={styles.eventDay} lightColor="#27704D" darkColor="#27704D">
-                {startDate.getDate()}
-              </ThemedText>
-            </ThemedView>
+          <ThemedView key={event.event_id} style={styles.eventCard} lightColor="#58ADE0" darkColor="#58ADE0">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: isExpanded }}
+              accessibilityHint="Shows more event details"
+              onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
+              style={({ pressed }) => [
+                styles.eventCardHeader,
+                pressed && styles.eventCardPressed,
+              ]}>
+              <ThemedView style={styles.eventDateBadge} lightColor={EVENT_DATE_GREEN} darkColor={EVENT_DATE_GREEN}>
+                <ThemedText style={styles.eventMonth} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+                  {startDate.toLocaleDateString([], { month: 'short' })}
+                </ThemedText>
+                <ThemedText style={styles.eventDay} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+                  {startDate.getDate()}
+                </ThemedText>
+              </ThemedView>
 
-            <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
-              <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
-                {event.title}
-              </ThemedText>
-              <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
-                {formatEventTime(event)}{event.loc ? ` · ${event.loc}` : ''}
-              </ThemedText>
+              <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
+                <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
+                  {event.title}
+                </ThemedText>
+                {event.loc ? (
+                  <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+                    {event.loc}
+                  </ThemedText>
+                ) : null}
+                <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+                  {event.all_day
+                    ? 'All day'
+                    : `${formatClock(event.start)} - ${formatClock(event.end)}`}
+                </ThemedText>
+              </ThemedView>
 
-              {isExpanded && (
-                <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
-                  {event.desc ? (
-                    <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
-                      {event.desc}
+              <Ionicons
+                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                size={21}
+                color="#12304A"
+                style={styles.eventChevron}
+              />
+            </Pressable>
+
+            {isExpanded && (event.desc || event.link_button?.trim()) ? (
+              <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
+                {event.desc ? (
+                  <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
+                    {event.desc}
+                  </ThemedText>
+                ) : null}
+                {event.link_button?.trim() ? (
+                  <Pressable
+                    accessibilityRole="link"
+                    accessibilityLabel={event.link_button.trim()}
+                    onPress={() => openEventLink(event.link_url)}
+                    style={({ pressed }) => [
+                      styles.eventLinkButton,
+                      pressed && styles.eventLinkButtonPressed,
+                    ]}
+                  >
+                    <ThemedText style={styles.eventLinkButtonText} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+                      {event.link_button.trim()}
                     </ThemedText>
-                  ) : null}
-                  {!event.all_day ? (
-                    <ThemedText style={styles.eventEndTime} lightColor="#12304A" darkColor="#12304A">
-                      Ends {new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                    </ThemedText>
-                  ) : null}
-                </ThemedView>
-              )}
-            </ThemedView>
-
-            <Ionicons
-              name={isExpanded ? 'chevron-up' : 'chevron-down'}
-              size={21}
-              color="#12304A"
-              style={styles.eventChevron}
-            />
-          </Pressable>
+                  </Pressable>
+                ) : null}
+              </ThemedView>
+            ) : null}
+          </ThemedView>
         );
       })}
 
@@ -423,8 +451,6 @@ const styles = StyleSheet.create({
   },
 
   eventCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     backgroundColor: '#58ADE0',
     borderRadius: 12,
     marginBottom: 10,
@@ -434,6 +460,11 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+  },
+
+  eventCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   eventCardPressed: {
@@ -488,8 +519,9 @@ const styles = StyleSheet.create({
   eventDetails: {
     borderTopColor: 'rgba(18, 48, 74, 0.28)',
     borderTopWidth: StyleSheet.hairlineWidth,
-    marginTop: 10,
-    paddingTop: 9,
+    marginHorizontal: 12,
+    marginBottom: 12,
+    paddingTop: 10,
   },
 
   eventDescription: {
@@ -497,9 +529,22 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  eventEndTime: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: 8,
-  }
+  eventLinkButton: {
+    alignItems: 'center',
+    backgroundColor: EVENT_DATE_GREEN,
+    borderRadius: 10,
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+
+  eventLinkButtonPressed: {
+    opacity: 0.85,
+  },
+
+  eventLinkButtonText: {
+    color: EVENT_DATE_GREEN_TEXT,
+    fontSize: 15,
+    fontWeight: '700',
+  },
 });
