@@ -54,6 +54,7 @@ export default function HomeScreen() {
   const [topNotification, setTopNotification] = useState<NotificationItem | null>(null);
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadContent() {
@@ -126,6 +127,16 @@ export default function HomeScreen() {
 
     loadContent();
   }, [])
+
+  function toggleFilter(filter: string) {
+  setSelectedFilters((current) => {
+    if (current.includes(filter)) {
+      return [];
+    }
+
+    return [filter];
+  });
+}
 
   async function fetchNews(skill_id: string): Promise<NewsItem[]> {
     const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/news?skill_id=${skill_id}`;
@@ -216,88 +227,115 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.headerText}>Annoucements</ThemedText>
       </ThemedView>
 
-      {/* <ThemedView style={[styles.card, styles.blueCard]}>
-        <Ionicons name="alert-circle" size={22} color="#FFFFFF" style={styles.icon} />
-        <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          {mobileContent.notice_box || "This is a sample announcement message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
-        </ThemedText>
-      </ThemedView> */}
+      <ThemedView style={styles.filterContainer}>
+        {['Alerts', 'Calendar', 'News'].map((filter) => {
+          const isSelected = selectedFilters.includes(filter);
 
-      <ThemedView style={[styles.card, styles.redCard]}>
-        <ThemedView style={styles.alertHeader}>
-          <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.alertIcon} />
-          {topNotification?.title ? (<ThemedText type="subtitle" style={styles.alertTitle} lightColor="#FFFFFF">
-            {topNotification.title}
-          </ThemedText>) : null}
-        </ThemedView>
-        <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-          {topNotification?.description || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
-        </ThemedText>
+          return (
+            <Pressable
+              key={filter}
+              onPress={() => toggleFilter(filter)}
+              style={[
+                styles.filterButton,
+                isSelected && styles.filterButtonSelected,
+              ]}
+            >
+              <ThemedText
+                style={styles.filterButtonText}
+                lightColor={isSelected ? '#FFFFFF' : '#12304A'}
+                darkColor={isSelected ? '#FFFFFF' : '#12304A'}
+              >
+                {filter}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
       </ThemedView>
 
-      <ThemedView style={styles.titleContainer}>
-  <ThemedText type="title" style={styles.headerText}>
-      Upcoming Events
-  </ThemedText>
-    </ThemedView>
-
-      {calendarItems.map((event) => {
-        const startDate = new Date(event.start);
-        const isExpanded = expandedEventId === event.event_id;
-
-        return (
-          <Pressable
-            key={event.event_id}
-            accessibilityRole="button"
-            accessibilityState={{ expanded: isExpanded }}
-            accessibilityHint="Shows more event details"
-            onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
-            style={({ pressed }) => [
-              styles.eventCard,
-              pressed && styles.eventCardPressed,
-            ]}>
-            <ThemedView style={styles.eventDateBadge} lightColor="#DDF3E7" darkColor="#DDF3E7">
-              <ThemedText style={styles.eventMonth} lightColor="#27704D" darkColor="#27704D">
-                {startDate.toLocaleDateString([], { month: 'short' })}
+      {(selectedFilters.length === 0 || selectedFilters.includes('Alerts')) && (
+        <ThemedView style={[styles.card, styles.redCard]}>
+          <ThemedView style={styles.alertHeader}>
+            <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.alertIcon} />
+            {topNotification?.title ? (
+              <ThemedText type="subtitle" style={styles.alertTitle} lightColor="#FFFFFF">
+                {topNotification.title}
               </ThemedText>
-              <ThemedText style={styles.eventDay} lightColor="#27704D" darkColor="#27704D">
-                {startDate.getDate()}
-              </ThemedText>
-            </ThemedView>
+            ) : null}
+          </ThemedView>
 
-            <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
-              <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
-                {event.title}
-              </ThemedText>
-              <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
-                {formatEventTime(event)}{event.loc ? ` · ${event.loc}` : ''}
-              </ThemedText>
+          <ThemedText style={styles.cardText} lightColor="#FFFFFF">
+            {topNotification?.description || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
+          </ThemedText>
+        </ThemedView>
+      )}
 
-              {isExpanded && (
-                <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
-                  {event.desc ? (
-                    <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
-                      {event.desc}
-                    </ThemedText>
-                  ) : null}
-                  {!event.all_day ? (
-                    <ThemedText style={styles.eventEndTime} lightColor="#12304A" darkColor="#12304A">
-                      Ends {new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                    </ThemedText>
-                  ) : null}
+      {(selectedFilters.length === 0 || selectedFilters.includes('Calendar')) && (
+        <>
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="title" style={styles.headerText}>
+              Upcoming Events
+            </ThemedText>
+          </ThemedView>
+
+          {calendarItems.map((event) => {
+            const startDate = new Date(event.start);
+            const isExpanded = expandedEventId === event.event_id;
+
+            return (
+              <Pressable
+                key={event.event_id}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: isExpanded }}
+                accessibilityHint="Shows more event details"
+                onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
+                style={({ pressed }) => [
+                  styles.eventCard,
+                  pressed && styles.eventCardPressed,
+                ]}>
+                <ThemedView style={styles.eventDateBadge} lightColor="#DDF3E7" darkColor="#DDF3E7">
+                  <ThemedText style={styles.eventMonth} lightColor="#27704D" darkColor="#27704D">
+                    {startDate.toLocaleDateString([], { month: 'short' })}
+                  </ThemedText>
+                  <ThemedText style={styles.eventDay} lightColor="#27704D" darkColor="#27704D">
+                    {startDate.getDate()}
+                  </ThemedText>
                 </ThemedView>
-              )}
-            </ThemedView>
 
-            <Ionicons
-              name={isExpanded ? 'chevron-up' : 'chevron-down'}
-              size={21}
-              color="#12304A"
-              style={styles.eventChevron}
-            />
-          </Pressable>
-        );
-      })}
+                <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
+                  <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
+                    {event.title}
+                  </ThemedText>
+                  <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+                    {formatEventTime(event)}{event.loc ? ` · ${event.loc}` : ''}
+                  </ThemedText>
+
+                  {isExpanded && (
+                    <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
+                      {event.desc ? (
+                        <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
+                          {event.desc}
+                        </ThemedText>
+                      ) : null}
+                      {!event.all_day ? (
+                        <ThemedText style={styles.eventEndTime} lightColor="#12304A" darkColor="#12304A">
+                          Ends {new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                        </ThemedText>
+                      ) : null}
+                    </ThemedView>
+                  )}
+                </ThemedView>
+
+                <Ionicons
+                  name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                  size={21}
+                  color="#12304A"
+                  style={styles.eventChevron}
+                />
+              </Pressable>
+            );
+          })}
+        </>
+      )}
 
       {/* <ThemedView style={styles.divider} /> */}
 
@@ -305,35 +343,65 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.headerText}>News</ThemedText>
       </ThemedView> */}
 
-      <ThemedView style={styles.titleContainer}>
-    <ThemedText type="title" style={styles.headerText}>
-      News
-    </ThemedText>
-      </ThemedView> 
+      {(selectedFilters.length === 0 || selectedFilters.includes('News')) && (
+        <>
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="title" style={styles.headerText}>
+              News
+            </ThemedText>
+          </ThemedView>
 
-      {newsItems.map((item) => {
-        const imageUrl = item.video_url?.[0];
+          {newsItems.map((item) => {
+            const imageUrl = item.video_url?.[0];
 
-        return (
-          <Link key={item.newsletter_id} href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null, link_url: item.link_url ?? null,}}}>
-            <ThemedView style={[styles.card, styles.blueCard]}>
-              {imageUrl ? (<Image source={{ uri: imageUrl}} style={styles.newsImage} contentFit='cover'/>) : null}
-              <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>
-                {item.title}
-              </ThemedText>
-              <ThemedText style={{color:"#fff", textDecorationLine: "underline"}}>
-                Read More
-              </ThemedText>
-            </ThemedView>
-          </Link>
-        );
-      })}
+            return (
+              <Link key={item.newsletter_id} href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null, link_url: item.link_url ?? null,}}}>
+                <ThemedView style={[styles.card, styles.blueCard]}>
+                  {imageUrl ? (<Image source={{ uri: imageUrl}} style={styles.newsImage} contentFit='cover'/>) : null}
+                  <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>
+                    {item.title}
+                  </ThemedText>
+                  <ThemedText style={{color:"#fff", textDecorationLine: "underline"}}>
+                    Read More
+                  </ThemedText>
+                </ThemedView>
+              </Link>
+            );
+          })}
+        </>
+      )}
 
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  filterButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#58ADE0',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+
+  filterButtonSelected: {
+    backgroundColor: '#58ADE0',
+  },
+
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
   titleContainer: {
     paddingVertical: 10
   },
