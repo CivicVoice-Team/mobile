@@ -81,10 +81,14 @@ function EventCard({
   const startDate = new Date(event.start);
   const [stackTitle, setStackTitle] = useState(false);
   const cardWidthRef = useRef(0);
+
   const timeLabel = event.all_day
     ? 'All day'
     : `${formatClock(event.start)} - ${formatClock(event.end)}`;
-  const accessibilityLabel = [event.title, event.loc, timeLabel].filter(Boolean).join(', ');
+
+  const accessibilityLabel = [event.title, event.loc, timeLabel]
+    .filter(Boolean)
+    .join(', ');
 
   const chevron = (
     <Ionicons
@@ -102,11 +106,14 @@ function EventCard({
       darkColor="#58ADE0"
       onLayout={(e) => {
         const width = Math.round(e.nativeEvent.layout.width);
+
         if (cardWidthRef.current !== 0 && width !== cardWidthRef.current) {
           setStackTitle(false);
         }
+
         cardWidthRef.current = width;
-      }}>
+      }}
+    >
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
@@ -116,33 +123,66 @@ function EventCard({
         style={({ pressed }) => [
           styles.eventCardHeader,
           pressed && styles.eventCardPressed,
-        ]}>
+        ]}
+      >
         {stackTitle ? (
-          <ThemedView style={styles.eventTitleRow} lightColor="#58ADE0" darkColor="#58ADE0">
-            <ThemedText type="defaultSemiBold" style={styles.eventTitleStacked} lightColor="#12304A" darkColor="#12304A">
+          <ThemedView
+            style={styles.eventTitleRow}
+            lightColor="#58ADE0"
+            darkColor="#58ADE0"
+          >
+            <ThemedText
+              type="defaultSemiBold"
+              style={styles.eventTitleStacked}
+              lightColor="#12304A"
+              darkColor="#12304A"
+            >
               {event.title}
             </ThemedText>
+
             {chevron}
           </ThemedView>
         ) : null}
 
-        <ThemedView style={styles.eventBodyRow} lightColor="#58ADE0" darkColor="#58ADE0">
-          <ThemedView style={styles.eventDateBadge} lightColor={EVENT_DATE_GREEN} darkColor={EVENT_DATE_GREEN}>
-            <ThemedText style={styles.eventMonth} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+        <ThemedView
+          style={styles.eventBodyRow}
+          lightColor="#58ADE0"
+          darkColor="#58ADE0"
+        >
+          <ThemedView
+            style={styles.eventDateBadge}
+            lightColor={EVENT_DATE_GREEN}
+            darkColor={EVENT_DATE_GREEN}
+          >
+            <ThemedText
+              style={styles.eventMonth}
+              lightColor={EVENT_DATE_GREEN_TEXT}
+              darkColor={EVENT_DATE_GREEN_TEXT}
+            >
               {startDate.toLocaleDateString([], { month: 'short' })}
             </ThemedText>
-            <ThemedText style={styles.eventDay} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+
+            <ThemedText
+              style={styles.eventDay}
+              lightColor={EVENT_DATE_GREEN_TEXT}
+              darkColor={EVENT_DATE_GREEN_TEXT}
+            >
               {startDate.getDate()}
             </ThemedText>
           </ThemedView>
 
-          <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
+          <ThemedView
+            style={styles.eventSummary}
+            lightColor="#58ADE0"
+            darkColor="#58ADE0"
+          >
             <View
               pointerEvents="none"
               accessible={false}
               accessibilityElementsHidden
               importantForAccessibility="no"
-              style={styles.eventTitleMeasureWrap}>
+              style={styles.eventTitleMeasureWrap}
+            >
               <ThemedText
                 type="defaultSemiBold"
                 accessible={false}
@@ -154,21 +194,38 @@ function EventCard({
                   if (e.nativeEvent.lines.length > 1) {
                     setStackTitle((prev) => (prev ? prev : true));
                   }
-                }}>
+                }}
+              >
                 {event.title}
               </ThemedText>
             </View>
+
             {stackTitle ? null : (
-              <ThemedText type="defaultSemiBold" style={styles.eventTitleInline} lightColor="#12304A" darkColor="#12304A">
+              <ThemedText
+                type="defaultSemiBold"
+                style={styles.eventTitleInline}
+                lightColor="#12304A"
+                darkColor="#12304A"
+              >
                 {event.title}
               </ThemedText>
             )}
+
             {event.loc ? (
-              <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+              <ThemedText
+                style={styles.eventMeta}
+                lightColor="#12304A"
+                darkColor="#12304A"
+              >
                 {event.loc}
               </ThemedText>
             ) : null}
-            <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
+
+            <ThemedText
+              style={styles.eventMeta}
+              lightColor="#12304A"
+              darkColor="#12304A"
+            >
               {event.all_day
                 ? 'All day'
                 : `${formatClock(event.start)} - ${formatClock(event.end)}`}
@@ -182,12 +239,21 @@ function EventCard({
       </Pressable>
 
       {isExpanded && (event.desc || event.link_button?.trim()) ? (
-        <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
+        <ThemedView
+          style={styles.eventDetails}
+          lightColor="#58ADE0"
+          darkColor="#58ADE0"
+        >
           {event.desc ? (
-            <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
+            <ThemedText
+              style={styles.eventDescription}
+              lightColor="#12304A"
+              darkColor="#12304A"
+            >
               {event.desc}
             </ThemedText>
           ) : null}
+
           {event.link_button?.trim() ? (
             <Pressable
               accessibilityRole="link"
@@ -198,7 +264,11 @@ function EventCard({
                 pressed && styles.eventLinkButtonPressed,
               ]}
             >
-              <ThemedText style={styles.eventLinkButtonText} lightColor={EVENT_DATE_GREEN_TEXT} darkColor={EVENT_DATE_GREEN_TEXT}>
+              <ThemedText
+                style={styles.eventLinkButtonText}
+                lightColor={EVENT_DATE_GREEN_TEXT}
+                darkColor={EVENT_DATE_GREEN_TEXT}
+              >
                 {event.link_button.trim()}
               </ThemedText>
             </Pressable>
@@ -212,15 +282,17 @@ function EventCard({
 export default function HomeScreen() {
   const [mobileContent, setMobileContent] = useState<Record<string, string>>({});
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [topNotification, setTopNotification] = useState<NotificationItem | null>(null);
+  const [topNotification, setTopNotification] =
+    useState<NotificationItem | null>(null);
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+
+  // Filter state
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadContent() {
       // Mobile Content
-      
       const data: MobileContentItem[] = await fetchMobileContent(SKILL_ID);
 
       const mapped: Record<string, string> = {};
@@ -235,17 +307,21 @@ export default function HomeScreen() {
       try {
         const notifications = await fetchNotifications(SKILL_ID);
 
-        //const latestNotification = notifications.filter((n) => n.state !== "INVALID").sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-
         const now = new Date();
 
-        const nextNotification = notifications.filter((n) => {
-          if (n.state === "INVALID") return false;
-          const notificationDate = new Date(n.date);
-          return notificationDate >= now;
-        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+        const nextNotification = notifications
+          .filter((n) => {
+            if (n.state === "INVALID") return false;
 
+            const notificationDate = new Date(n.date);
 
+            return notificationDate >= now;
+          })
+          .sort(
+            (a, b) =>
+              new Date(a.date).getTime() -
+              new Date(b.date).getTime()
+          )[0];
 
         if (nextNotification) {
           setTopNotification(nextNotification);
@@ -265,55 +341,52 @@ export default function HomeScreen() {
         console.error("News fetch failed:", err);
       }
 
-
       // Calendar Content
-
-      try{
+      try {
         const events = await fetchCalendar(SKILL_ID);
 
         const upcomingEvents = events
-        .filter((event) => new Date(event.end) >= new Date())
-        .sort(
-          (a, b) =>
-            new Date(a.start).getTime() - new Date(b.start).getTime()
-        );
+          .filter((event) => new Date(event.end) >= new Date())
+          .sort(
+            (a, b) =>
+              new Date(a.start).getTime() -
+              new Date(b.start).getTime()
+          );
 
         setCalendarItems(upcomingEvents);
-
       } catch (err) {
         console.error("Calendar fetch failed:", err);
       }
-      
     }
 
     loadContent();
-  }, [])
+  }, []);
 
+  // Filter behavior:
+  // No filter selected = show everything.
+  // Selecting a filter removes the previous filter.
+  // Selecting the active filter again clears the filter.
   function toggleFilter(filter: string) {
-  setSelectedFilters((current) => {
-    if (current.includes(filter)) {
-      return [];
-    }
+    setSelectedFilters((current) => {
+      if (current.includes(filter)) {
+        return [];
+      }
 
-    return [filter];
-  });
-}
+      return [filter];
+    });
+  }
 
   async function fetchNews(skill_id: string): Promise<NewsItem[]> {
     const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/news?skill_id=${skill_id}`;
 
     const res = await fetch(url);
 
-    //console.log("NEWS STATUS:", res.status);
-
-    if(!res.ok) {
+    if (!res.ok) {
       const errText = await res.text();
-      //console.log("ERROR BODY:", errText);
       throw new Error(`Failed to fetch news: ${res.status}`);
     }
 
     const data = await res.json();
-    //console.log("NEWS DATA:", data);
 
     return data;
   }
@@ -322,64 +395,88 @@ export default function HomeScreen() {
     skill_id: string
   ): Promise<NotificationItem[]> {
     const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/notifications?skill_id=${skill_id}`;
+
     const res = await fetch(url);
 
     if (!res.ok) {
-      throw new Error( `Failed to fetch notifications: ${res.status}`);
+      throw new Error(
+        `Failed to fetch notifications: ${res.status}`
+      );
     }
 
     return res.json();
   }
 
+  async function fetchCalendar(
+    skill_id: string
+  ): Promise<CalendarItem[]> {
+    const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/get_calendar?skill_id=${encodeURIComponent(skill_id)}`;
 
-  async function fetchCalendar(skill_id: string): Promise<CalendarItem[]> {
-  const url = `https://sj3d3m472d.execute-api.us-east-1.amazonaws.com/dev/get_calendar?skill_id=${encodeURIComponent(skill_id)}`;
+    const res = await fetch(url);
 
-  const res = await fetch(url);
+    if (!res.ok) {
+      const body = await res.text();
 
-  if (!res.ok) {
-  const body = await res.text();
-  console.log("Calendar error:", res.status, body);
-  throw new Error(`Failed to fetch calendar: ${res.status}`);
-}
+      console.log("Calendar error:", res.status, body);
 
+      throw new Error(
+        `Failed to fetch calendar: ${res.status}`
+      );
+    }
 
-  return res.json();
-}
-
+    return res.json();
+  }
 
   function getLastYearNews(items: NewsItem[]) {
     const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-    return items.filter(item => {
-      if (!item.date) return false;
-      return new Date(item.date) >= oneYearAgo;
-    }).sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
+    oneYearAgo.setFullYear(
+      oneYearAgo.getFullYear() - 1
+    );
+
+    return items
+      .filter((item) => {
+        if (!item.date) return false;
+
+        return new Date(item.date) >= oneYearAgo;
+      })
+      .sort((a, b) => {
+        return (
+          new Date(b.date).getTime() -
+          new Date(a.date).getTime()
+        );
+      });
   }
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}
+      headerBackgroundColor={{
+        light: '#A1CEDC',
+        dark: '#1D3D47'
+      }}
       contentStyle={styles.feedContent}
       headerImage={
         <Image
           source={
-            mobileContent.home_banner 
-            ? { uri: mobileContent.home_banner } 
-            : require('@/assets/images/partial-react-logo.png')
+            mobileContent.home_banner
+              ? { uri: mobileContent.home_banner }
+              : require('@/assets/images/partial-react-logo.png')
           }
           style={styles.headerImage}
-          contentFit='cover'
+          contentFit="cover"
         />
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.headerText}>Annoucements</ThemedText>
+        <ThemedText
+          type="title"
+          style={styles.headerText}
+        >
+          Annoucements
+        </ThemedText>
       </ThemedView>
 
+      {/* FILTER BUTTONS */}
       <ThemedView style={styles.filterContainer}>
         {['Alerts', 'Calendar', 'News'].map((filter) => {
           const isSelected = selectedFilters.includes(filter);
@@ -395,8 +492,12 @@ export default function HomeScreen() {
             >
               <ThemedText
                 style={styles.filterButtonText}
-                lightColor={isSelected ? '#FFFFFF' : '#12304A'}
-                darkColor={isSelected ? '#FFFFFF' : '#12304A'}
+                lightColor={
+                  isSelected ? '#FFFFFF' : '#12304A'
+                }
+                darkColor={
+                  isSelected ? '#FFFFFF' : '#12304A'
+                }
               >
                 {filter}
               </ThemedText>
@@ -405,120 +506,84 @@ export default function HomeScreen() {
         })}
       </ThemedView>
 
-<<<<<<< HEAD
-      {(selectedFilters.length === 0 || selectedFilters.includes('Alerts')) && (
+      {/* ALERTS */}
+
+      {(selectedFilters.length === 0 ||
+        selectedFilters.includes('Alerts')) && (
         <ThemedView style={[styles.card, styles.redCard]}>
           <ThemedView style={styles.alertHeader}>
-            <Ionicons name="notifications" size={22} color="#FFFFFF" style={styles.alertIcon} />
+            <Ionicons
+              name="notifications"
+              size={22}
+              color="#FFFFFF"
+              style={styles.alertIcon}
+            />
+
             {topNotification?.title ? (
-              <ThemedText type="subtitle" style={styles.alertTitle} lightColor="#FFFFFF">
+              <ThemedText
+                type="subtitle"
+                style={styles.alertTitle}
+                lightColor="#FFFFFF"
+              >
                 {topNotification.title}
               </ThemedText>
             ) : null}
           </ThemedView>
 
-          <ThemedText style={styles.cardText} lightColor="#FFFFFF">
-            {topNotification?.description || mobileContent.alert_box || "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
+          <ThemedText
+            style={styles.cardText}
+            lightColor="#FFFFFF"
+          >
+            {topNotification?.description ||
+              mobileContent.alert_box ||
+              "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
           </ThemedText>
         </ThemedView>
       )}
 
-      {(selectedFilters.length === 0 || selectedFilters.includes('Calendar')) && (
+      {/* CALENDAR */}
+
+      {(selectedFilters.length === 0 ||
+        selectedFilters.includes('Calendar')) && (
         <>
           <ThemedView style={styles.titleContainer}>
-            <ThemedText type="title" style={styles.headerText}>
+            <ThemedText
+              type="title"
+              style={styles.headerText}
+            >
               Upcoming Events
             </ThemedText>
           </ThemedView>
 
-          {calendarItems.map((event) => {
-            const startDate = new Date(event.start);
-            const isExpanded = expandedEventId === event.event_id;
-
-            return (
-              <Pressable
-                key={event.event_id}
-                accessibilityRole="button"
-                accessibilityState={{ expanded: isExpanded }}
-                accessibilityHint="Shows more event details"
-                onPress={() => setExpandedEventId(isExpanded ? null : event.event_id)}
-                style={({ pressed }) => [
-                  styles.eventCard,
-                  pressed && styles.eventCardPressed,
-                ]}>
-                <ThemedView style={styles.eventDateBadge} lightColor="#DDF3E7" darkColor="#DDF3E7">
-                  <ThemedText style={styles.eventMonth} lightColor="#27704D" darkColor="#27704D">
-                    {startDate.toLocaleDateString([], { month: 'short' })}
-                  </ThemedText>
-                  <ThemedText style={styles.eventDay} lightColor="#27704D" darkColor="#27704D">
-                    {startDate.getDate()}
-                  </ThemedText>
-                </ThemedView>
-
-                <ThemedView style={styles.eventSummary} lightColor="#58ADE0" darkColor="#58ADE0">
-                  <ThemedText type="defaultSemiBold" style={styles.eventTitle} lightColor="#12304A" darkColor="#12304A">
-                    {event.title}
-                  </ThemedText>
-                  <ThemedText style={styles.eventMeta} lightColor="#12304A" darkColor="#12304A">
-                    {formatEventTime(event)}{event.loc ? ` · ${event.loc}` : ''}
-                  </ThemedText>
-
-                  {isExpanded && (
-                    <ThemedView style={styles.eventDetails} lightColor="#58ADE0" darkColor="#58ADE0">
-                      {event.desc ? (
-                        <ThemedText style={styles.eventDescription} lightColor="#12304A" darkColor="#12304A">
-                          {event.desc}
-                        </ThemedText>
-                      ) : null}
-                      {!event.all_day ? (
-                        <ThemedText style={styles.eventEndTime} lightColor="#12304A" darkColor="#12304A">
-                          Ends {new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                        </ThemedText>
-                      ) : null}
-                    </ThemedView>
-                  )}
-                </ThemedView>
-
-                <Ionicons
-                  name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                  size={21}
-                  color="#12304A"
-                  style={styles.eventChevron}
-                />
-              </Pressable>
-            );
-          })}
+          {calendarItems.map((event) => (
+            <EventCard
+              key={event.event_id}
+              event={event}
+              isExpanded={
+                expandedEventId === event.event_id
+              }
+              onToggle={() =>
+                setExpandedEventId(
+                  expandedEventId === event.event_id
+                    ? null
+                    : event.event_id
+                )
+              }
+            />
+          ))}
         </>
       )}
-=======
-      <ThemedView style={styles.titleContainer}>
-  <ThemedText type="title" style={styles.headerText}>
-      Upcoming Events
-  </ThemedText>
-    </ThemedView>
 
-      {calendarItems.map((event) => (
-        <EventCard
-          key={event.event_id}
-          event={event}
-          isExpanded={expandedEventId === event.event_id}
-          onToggle={() =>
-            setExpandedEventId(expandedEventId === event.event_id ? null : event.event_id)
-          }
-        />
-      ))}
->>>>>>> refs/remotes/origin/main
+      {/* NEWS */}
 
-      {/* <ThemedView style={styles.divider} /> */}
-
-      {/* <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.headerText}>News</ThemedText>
-      </ThemedView> */}
-
-      {(selectedFilters.length === 0 || selectedFilters.includes('News')) && (
+      {(selectedFilters.length === 0 ||
+        selectedFilters.includes('News')) && (
         <>
           <ThemedView style={styles.titleContainer}>
-            <ThemedText type="title" style={styles.headerText}>
+            <ThemedText
+              type="title"
+              style={styles.headerText}
+            >
               News
             </ThemedText>
           </ThemedView>
@@ -527,13 +592,51 @@ export default function HomeScreen() {
             const imageUrl = item.video_url?.[0];
 
             return (
-              <Link key={item.newsletter_id} href={{pathname: "/news/[id]", params: {id: item.newsletter_id, title: item.title, description: item.description, date: item.date, imageUrl: item.video_url?.[0] ?? null, link_url: item.link_url ?? null,}}}>
-                <ThemedView style={[styles.card, styles.blueCard]}>
-                  {imageUrl ? (<Image source={{ uri: imageUrl}} style={styles.newsImage} contentFit='cover'/>) : null}
-                  <ThemedText type="subtitle" style={{fontWeight: "bold", marginBottom: 10}} lightColor='#fff'>
+              <Link
+                key={item.newsletter_id}
+                href={{
+                  pathname: "/news/[id]",
+                  params: {
+                    id: item.newsletter_id,
+                    title: item.title,
+                    description: item.description,
+                    date: item.date,
+                    imageUrl: item.video_url?.[0] ?? null,
+                    link_url: item.link_url ?? null,
+                  }
+                }}
+              >
+                <ThemedView
+                  style={[
+                    styles.card,
+                    styles.blueCard
+                  ]}
+                >
+                  {imageUrl ? (
+                    <Image
+                      source={{ uri: imageUrl }}
+                      style={styles.newsImage}
+                      contentFit="cover"
+                    />
+                  ) : null}
+
+                  <ThemedText
+                    type="subtitle"
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: 10
+                    }}
+                    lightColor="#fff"
+                  >
                     {item.title}
                   </ThemedText>
-                  <ThemedText style={{color:"#fff", textDecorationLine: "underline"}}>
+
+                  <ThemedText
+                    style={{
+                      color: "#fff",
+                      textDecorationLine: "underline"
+                    }}
+                  >
                     Read More
                   </ThemedText>
                 </ThemedView>
@@ -542,13 +645,17 @@ export default function HomeScreen() {
           })}
         </>
       )}
-
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
+  feedContent: {
+    paddingHorizontal: 16,
+  },
+
+  // FILTER STYLES
+
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -573,10 +680,6 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
-=======
-  feedContent: {
-    paddingHorizontal: 16,
->>>>>>> refs/remotes/origin/main
   },
 
   titleContainer: {
@@ -597,7 +700,10 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: {
+      width: 0,
+      height: 3
+    },
     elevation: 3
   },
 
@@ -675,7 +781,10 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
     elevation: 2,
   },
 
