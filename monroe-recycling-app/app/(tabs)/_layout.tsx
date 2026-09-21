@@ -31,37 +31,39 @@ export default function TabLayout() {
 
   const isLocationScreen = segments.includes("locations") || segments.includes("ecopark");
 
-  //const locationlink = SKILL_ID == "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d" ? '/locations/0' : '/ecopark';
-
-  const [firstLocationId, setFirstLocationId] = useState<string | null>(null);
+  const [locationlink, setLocationlink] = useState<Href>(
+    SKILL_ID === "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d"
+        ? "/locations"
+        : "/ecopark"
+  );
 
   useEffect(() => {
-    async function loadFirstLocation() {
+    if (SKILL_ID !== "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d") {
+      return;
+    }
+
+    async function loadLocationTab() {
       try {
         const locations = await fetchLocations(SKILL_ID);
 
-        if (locations.length > 0) {
-          setFirstLocationId(locations[0].location_id);
+        if (locations.length === 1) {
+          setLocationlink({
+            pathname: "/locations/[id]",
+            params: {
+              id: locations[0].location_id,
+            },
+          });
+        } else {
+          setLocationlink("/locations");
         }
       } catch (error) {
-        console.error("Failed to load locations", error);
+        console.error("Failed to load locations tab", error);
+        setLocationlink("/locations");
       }
     }
 
-    loadFirstLocation();
+    loadLocationTab();
   }, []);
-
-  const locationlink: Href | null =
-    SKILL_ID === "amzn1.ask.skill.dd463ba3-38f4-423f-acd4-4d9d2a4a7d4d"
-        ? firstLocationId
-            ? {
-                pathname: "/locations/[id]",
-                params: {
-                    id: firstLocationId,
-                },
-            }
-            : null
-        : "/ecopark";
 
   const TABS = [
         {
@@ -112,7 +114,7 @@ export default function TabLayout() {
             ...(tab.name === 'camera'
               ? { href: '/faq-search' }
               : {}),
-            ...(tab.name === 'ecopark' && locationlink
+            ...(tab.name === 'ecopark'
               ? { href: locationlink }
               : {}),
           }}
@@ -132,6 +134,12 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="faq-search"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="locations/index"
         options={{
           href: null,
         }}

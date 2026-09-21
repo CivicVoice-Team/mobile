@@ -15,7 +15,6 @@ export async function searchFAQs(query: string, skillId: string) {
   return (data.results || []).map((item: any) => ({
     ...item,
     id: item.id ?? item.objectID,
-    hazardous: item.hazardous ?? false,
     read_more: item.read_more,
     description:
       item.mobile && item.mobile.trim().length > 0 ? item.mobile : item.answer,

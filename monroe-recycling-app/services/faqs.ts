@@ -1,10 +1,12 @@
 export type FAQTag = {
     name: string;
     link?: string;
+    icon?: string;
+    color?: string;
+    type?: string;
 };
 
 export type FAQItem = {
-    hazardous: boolean;
     id: string;
     skill_id: string;
     question: string;
@@ -33,8 +35,6 @@ export async function fetchFAQs(skill_id: string): Promise<FAQItem[]> {
             ...item,
             id: item.id,
             skill_id: item.skill_id,
-
-            hazardous: item.hazardous ?? false,
 
             description: hasMobile ? item.mobile: item.answer,
             tags: item.tags ?? [],

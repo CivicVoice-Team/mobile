@@ -1,5 +1,9 @@
 import type { LocationItem } from "@/types/location";
 
+export function getLocationImageUrl(locationId: string) {
+    return `https://civicvoice-images.s3.us-east-1.amazonaws.com/public/locations/${locationId}`;
+}
+
 export async function fetchLocations(skill_id:string): Promise<LocationItem[]> {
     const params = new URLSearchParams({ skill_id });
 

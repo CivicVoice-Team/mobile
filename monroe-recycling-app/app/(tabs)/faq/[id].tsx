@@ -11,6 +11,11 @@ export default function FAQDetail() {
     const router = useRouter();
     const [showReadMore, setShowReadMore] = useState(false);
 
+    const isLocationTag = (tag: any) =>
+        tag?.type === "maps" || tag?.icon === "location";
+    const locationTags = parsedTags.filter(isLocationTag);
+    const displayTags = parsedTags.filter((tag: any) => !isLocationTag(tag));
+
     const questionText = typeof question === "string" ? question : "";
     const title = questionText.split(",")[0].trim();
     const mobileText =
@@ -44,6 +49,7 @@ export default function FAQDetail() {
         leaf: "leaf",
         caution: "warning",
         dollar: "cash",
+        card: "card",
         calendar: "calendar",
         clock: "time",
         location: "location",
@@ -74,7 +80,7 @@ export default function FAQDetail() {
                 <ThemedText type="title" style={styles.title}>{title}</ThemedText>
 
                 <View style={styles.tagContainer}>
-                    {parsedTags.map((tag: any, index: number) => (
+                    {displayTags.map((tag: any, index: number) => (
                         <TouchableOpacity
                             key={index}
                             style={[styles.detailTag,
@@ -146,6 +152,43 @@ export default function FAQDetail() {
                             </ThemedText>
                         )}
                     </>
+                )}
+
+                {locationTags.length > 0 && (
+                    <View style={styles.locationsSection}>
+                        <ThemedText style={styles.locationsHeading}>
+                            Drop-Off Location Map
+                        </ThemedText>
+                        {locationTags.map((tag: any, index: number) => (
+                            <TouchableOpacity
+                                key={`${tag.name}-${index}`}
+                                style={styles.locationRow}
+                                onPress={async () => {
+                                    const url = getTagUrl(tag);
+
+                                    if (!url) return;
+
+                                    const supported = await Linking.canOpenURL(url);
+
+                                    if (supported) {
+                                        await Linking.openURL(url);
+                                    } else {
+                                        console.warn(`Cannot open URL: ${url}`);
+                                    }
+                                }}
+                            >
+                                <Ionicons
+                                    name="location"
+                                    size={16}
+                                    color="#3478F6"
+                                    style={styles.locationIcon}
+                                />
+                                <ThemedText style={styles.locationName}>
+                                    {tag.name}
+                                </ThemedText>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 )}
 
             </ScrollView>
@@ -229,5 +272,33 @@ const styles = StyleSheet.create({
         marginTop: 16,
         fontSize: 16,
         lineHeight: 24
+    },
+
+    locationsSection: {
+        marginTop: 32,
+        paddingBottom: 24,
+    },
+
+    locationsHeading: {
+        fontSize: 18,
+        fontWeight: "700",
+        marginBottom: 10,
+    },
+
+    locationRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 8,
+    },
+
+    locationIcon: {
+        marginRight: 8,
+    },
+
+    locationName: {
+        fontSize: 16,
+        lineHeight: 22,
+        textDecorationLine: "underline",
+        color: "#3478F6",
     }
 });

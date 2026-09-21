@@ -12,10 +12,101 @@ import { SKILL_ID } from '@/constants/config';
 
 import { useLocalSearchParams } from 'expo-router';
 
+const TAG_ICONS = {
+    leaf: "leaf",
+    caution: "warning",
+    dollar: "cash",
+    card: "card",
+    calendar: "calendar",
+    clock: "time",
+    location: "location",
+    "information-circle": "information-circle",
+} as const;
+
+const TAG_COLORS = {
+    green: "#3FA34D",
+    blue: "#3478F6",
+    red: "#D9534F",
+    orange: "#F59E0B",
+    yellow: "#EAB308",
+    purple: "#8B5CF6",
+    gray: "#6B7280",
+};
+
+function getUniqueCardTagIcons(tags: FAQItem["tags"] = []) {
+    const seen = new Set<string>();
+    const icons: { iconName: (typeof TAG_ICONS)[keyof typeof TAG_ICONS]; color: string }[] = [];
+
+    for (const tag of tags) {
+        if (
+            tag.icon === "leaf" ||
+            tag.icon === "location" ||
+            tag.type === "maps" ||
+            tag.icon === "information-circle"
+        ) {
+            continue;
+        }
+
+        const iconName = TAG_ICONS[tag.icon as keyof typeof TAG_ICONS];
+        if (!iconName || seen.has(iconName)) {
+            continue;
+        }
+
+        seen.add(iconName);
+        icons.push({
+            iconName,
+            color: TAG_COLORS[tag.color as keyof typeof TAG_COLORS] ?? "#12304A",
+        });
+    }
+
+    return icons;
+}
+
+function FaqSearchCard({
+    faq,
+    imageUrl,
+    onPress,
+}: {
+    faq: FAQItem;
+    imageUrl: string;
+    onPress: () => void;
+}) {
+    const title = faq.question.split(",")[0];
+    const tagIcons = getUniqueCardTagIcons(faq.tags);
+
+    return (
+        <Pressable style={styles.card} onPress={onPress}>
+            <Image
+                source={{ uri: imageUrl }}
+                style={styles.image}
+                resizeMode="contain"
+            />
+
+            <View style={styles.textContainer}>
+                <ThemedText style={styles.question}>{title}</ThemedText>
+                {tagIcons.length > 0 && (
+                    <View style={styles.cardFooter}>
+                        <View style={styles.tagIcons}>
+                            {tagIcons.map((tagIcon) => (
+                                <Ionicons
+                                    key={tagIcon.iconName}
+                                    name={tagIcon.iconName}
+                                    size={16}
+                                    color={tagIcon.color}
+                                    style={styles.tagIcon}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                )}
+            </View>
+        </Pressable>
+    );
+}
+
 export default function FAQSearchScreen() {
     const backgroundColor = useThemeColor({}, 'background');
     const textColor = useThemeColor({}, 'text');
-    const iconColor = useThemeColor({}, 'icon');
     const params = useLocalSearchParams();
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const [searchText, setSearchText] = useState("");
@@ -79,21 +170,39 @@ export default function FAQSearchScreen() {
             contentContainerStyle={[styles.container, { backgroundColor }]}
             ListHeaderComponent={
                 <>
-    <View style={styles.searchWrapper}>
+    <View style={styles.searchBar}>
+      <Ionicons
+        name="search"
+        size={18}
+        color="#19549A"
+        style={styles.searchIcon}
+      />
       <TextInput
-        style={[styles.searchBar, { color: textColor }]}
-        placeholder="Search waste materials..."
-        placeholderTextColor={iconColor}
+        style={[styles.searchInput, { color: textColor }]}
+        placeholder="Search items..."
+        placeholderTextColor="#8A93A3"
         value={searchText}
         onChangeText={setSearchText}
+        returnKeyType="search"
+        autoCorrect={false}
+        autoCapitalize="none"
       />
-
-      <Ionicons
-        name="mic"
-        size={20}
-        color={iconColor}
-        style={styles.micIcon}
-      />
+      {searchText.length > 0 ? (
+        <Pressable
+          onPress={() => setSearchText("")}
+          hitSlop={8}
+          style={styles.searchAction}
+        >
+          <Ionicons name="close-circle" size={18} color="#8A93A3" />
+        </Pressable>
+      ) : (
+        <Ionicons
+          name="mic"
+          size={18}
+          color="#19549A"
+          style={styles.searchAction}
+        />
+      )}
     </View>
 
                 {searchText.trim().length === 0 && (
@@ -125,8 +234,9 @@ export default function FAQSearchScreen() {
                 ) : null
             }
             renderItem={({ item: faq }) => (
-                <Pressable
-                    style={[styles.card, faq.hazardous && styles.hazardousCard]}
+                <FaqSearchCard
+                    faq={faq}
+                    imageUrl={getFaqImageUrl(faq)}
                     onPress={() =>
                         router.push({
                             pathname: "/faq/[id]",
@@ -141,37 +251,7 @@ export default function FAQSearchScreen() {
                             },
                         })
                     }
-                >
-                    <Image
-                        source={{ uri: getFaqImageUrl(faq) }}
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
-
-                    <View style={styles.textContainer}>
-                        <ThemedText style={styles.question}>
-                            {faq.question.split(",")[0]}
-                        </ThemedText>
-
-                        {faq.hazardous && (
-                            <View style={styles.hazardBadge}>
-                                <Ionicons
-                                    name="warning"
-                                    size={14}
-                                    color="white"
-                                    style={{ marginRight: 4 }}
-                                />
-                                <ThemedText style={styles.hazardBadgeText}>
-                                    Hazardous
-                                </ThemedText>
-                            </View>
-                        )}
-                    </View>
-
-                    <ThemedText style={styles.learnMore}>
-                        Learn More
-                    </ThemedText>
-                </Pressable>
+                />
             )}
         />
     );
@@ -186,32 +266,33 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: "#58ADE0",
         padding: 14,
-        paddingBottom: 28,
         borderRadius: 12,
         marginBottom: 12,
         flexDirection: "row",
         alignItems: "center",
-        position: "relative",
-    },
-
-    hazardousCard: {
-        borderRightWidth: 6,
-        borderRightColor: "red"
     },
 
     question: {
         color: "#12304A",
         fontWeight: "700",
         marginBottom: 2,
+        maxWidth: 240,
     },
 
-    learnMore: {
-        position: "absolute",
-        right: 14,
-        bottom: 10,
-        color: "#12304A",
-        fontSize: 11,
-        textDecorationLine: "underline",
+    cardFooter: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 4,
+        minHeight: 18,
+    },
+
+    tagIcons: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    tagIcon: {
+        marginRight: 8,
     },
 
     image: {
@@ -224,23 +305,46 @@ const styles = StyleSheet.create({
 
     textContainer: {
         flex: 1,
-        paddingRight: 70,
+        minWidth: 0,
     },
 
     searchBar: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#FFFFFF",
         borderWidth: 1,
         borderColor: "#58ADE0",
-        borderRadius: 20,
-        backgroundColor: "#FFFFFF",
-        paddingHorizontal: 14,
-        paddingVertical: 9,
-        paddingRight: 44,
+        borderRadius: 24,
+        paddingLeft: 14,
+        paddingRight: 10,
+        paddingVertical: 4,
+        marginBottom: 16,
+        marginTop: 10,
+        minHeight: 46,
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        elevation: 2,
     },
 
-    micIcon:{
-        position: 'absolute',
-        right: 14,
-        top: 10,
+    searchIcon: {
+        marginRight: 8,
+    },
+
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        paddingVertical: 10,
+        paddingHorizontal: 0,
+    },
+
+    searchAction: {
+        padding: 4,
+        marginLeft: 4,
     },
 
     cameraPrompt:{
@@ -285,36 +389,6 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
 
-    hazardBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        alignSelf: "flex-start",
-        backgroundColor: "#D9534F",
-        borderRadius: 999,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        marginBottom: 8,
-    },
-
-    hazardBadgeText: {
-        color: "white",
-        fontSize: 12,
-        fontWeight: "600",
-    },
-
-    searchWrapper: {
-        position: "relative",
-        marginBottom: 16,
-        marginTop: 10
-    },
-
-    clearButton: {
-        position: "absolute",
-        right: 12,
-        top: "50%",
-        transform: [{ translateY: -11}]
-    },
-    
     noResultsContainer: {
         alignItems: "center",
         justifyContent: "center",
