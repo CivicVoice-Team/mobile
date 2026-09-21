@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/themed-text";
 import { useColorScheme } from "react-native";
 import { ThemedView } from "@/components/themed-view";
-import { Image } from 'expo-image';
+import { NewsCardImage } from "@/components/news-card-image";
 
 export default function NewsDetail() {
     const { title, description, date, imageUrl, link_url } = useLocalSearchParams();
@@ -17,11 +17,12 @@ export default function NewsDetail() {
         <ThemedView style={{ flex: 1}}>
             <ScrollView contentContainerStyle={styles.container}>
                 {imageUrl ? (
-                    <Image
-                        source={{ uri: imageUrl as string }}
-                        style={styles.headerImage}
-                        contentFit="cover"
-                    />
+                    <ThemedView style={styles.headerImage}>
+                        <NewsCardImage
+                            uri={Array.isArray(imageUrl) ? imageUrl[0] : String(imageUrl)}
+                            maxHeight={360}
+                        />
+                    </ThemedView>
                 ) : null}
                 <TouchableOpacity style={styles.backButton} onPress={() => router.push("/")}>
                     <Ionicons name="arrow-back" size={24} color="#456781" />
@@ -55,6 +56,7 @@ export default function NewsDetail() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    paddingTop: 100,
   },
 
   backButton: {
@@ -74,8 +76,8 @@ const styles = StyleSheet.create({
 
   headerImage: {
     width: "100%",
-    height: 220,
-    marginBottom: 16
+    marginBottom: 16,
+    backgroundColor: "transparent",
   },
 
   readMoreButton: {

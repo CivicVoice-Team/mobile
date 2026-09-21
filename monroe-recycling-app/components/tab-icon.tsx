@@ -19,7 +19,14 @@ export function TabIcon({
     const segments = useSegments() as string[];
 
     const isLocationScreen = segments.includes("ecopark") || segments.includes("locations");
-    const isActive = focused || (name === 'leaf' && isLocationScreen);
+    const isSearchScreen =
+      segments.includes("faq-search") ||
+      segments.includes("faq") ||
+      segments.includes("camera");
+    const isActive =
+      focused ||
+      (name === 'leaf' && isLocationScreen) ||
+      (name === 'search' && isSearchScreen);
 
     return (
         <View

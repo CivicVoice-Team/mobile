@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { searchFAQs } from '@/services/faqSearch';
 import { fetchFAQs, FAQItem } from '@/services/faqs';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +13,9 @@ import { SKILL_ID } from '@/constants/config';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function FAQSearchScreen() {
+    const backgroundColor = useThemeColor({}, 'background');
+    const textColor = useThemeColor({}, 'text');
+    const iconColor = useThemeColor({}, 'icon');
     const params = useLocalSearchParams();
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const [searchText, setSearchText] = useState("");
@@ -71,14 +75,15 @@ export default function FAQSearchScreen() {
         <FlatList
             data={filteredFaqs ?? faqs}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.container}
+            style={{ flex: 1, backgroundColor }}
+            contentContainerStyle={[styles.container, { backgroundColor }]}
             ListHeaderComponent={
                 <>
     <View style={styles.searchWrapper}>
       <TextInput
-        style={styles.searchBar}
+        style={[styles.searchBar, { color: textColor }]}
         placeholder="Search waste materials..."
-        placeholderTextColor="#D7DCE2"
+        placeholderTextColor={iconColor}
         value={searchText}
         onChangeText={setSearchText}
       />
@@ -86,18 +91,13 @@ export default function FAQSearchScreen() {
       <Ionicons
         name="mic"
         size={20}
-        color="#FFFFFF"
+        color={iconColor}
         style={styles.micIcon}
       />
     </View>
 
                 {searchText.trim().length === 0 && (
                 <View style={styles.cameraPrompt}>
-                    <ThemedText style={styles.instructions}>
-                    Before visiting alternate drop-off locations, confirm availability
-                    and hours of operation.
-                    </ThemedText>
-
                     <Pressable
                     style={styles.cameraButton}
                     onPress={() => router.push('/camera')}>
@@ -134,6 +134,7 @@ export default function FAQSearchScreen() {
                                 id: faq.id,
                                 question: faq.question,
                                 answer: faq.description,
+                                mobile: faq.mobile ?? "",
                                 read_more: faq.read_more ?? "",
                                 tags: JSON.stringify(faq.tags),
                                 updatedAt: faq.updatedAt ?? ""
@@ -165,11 +166,11 @@ export default function FAQSearchScreen() {
                                 </ThemedText>
                             </View>
                         )}
-
-                        <ThemedText style={styles.readMore} numberOfLines={1} ellipsizeMode="tail">
-                            {faq.description}
-                        </ThemedText>
                     </View>
+
+                    <ThemedText style={styles.learnMore}>
+                        Learn More
+                    </ThemedText>
                 </Pressable>
             )}
         />
@@ -180,16 +181,17 @@ const styles = StyleSheet.create({
     container: {
         padding: 16,
         paddingTop: 100,
-        backgroundColor: "#202223",
     },
 
     card: {
         backgroundColor: "#58ADE0",
         padding: 14,
+        paddingBottom: 28,
         borderRadius: 12,
         marginBottom: 12,
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        position: "relative",
     },
 
     hazardousCard: {
@@ -203,9 +205,12 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
 
-    readMore: {
+    learnMore: {
+        position: "absolute",
+        right: 14,
+        bottom: 10,
         color: "#12304A",
-        fontSize:11,
+        fontSize: 11,
         textDecorationLine: "underline",
     },
 
@@ -218,14 +223,15 @@ const styles = StyleSheet.create({
     },
 
     textContainer: {
-        flex: 1
+        flex: 1,
+        paddingRight: 70,
     },
 
     searchBar: {
         borderWidth: 1,
-        borderColor: "#D7DCE2",
+        borderColor: "#58ADE0",
         borderRadius: 20,
-        color: "#FFFFFF",
+        backgroundColor: "#FFFFFF",
         paddingHorizontal: 14,
         paddingVertical: 9,
         paddingRight: 44,
@@ -242,14 +248,6 @@ const styles = StyleSheet.create({
         marginBottom: 18,
     },
 
-    instructions: {
-        color: "#FFFFFF",
-        fontWeight: "600",
-        textAlign: "center",
-        fontSize: 13,
-        lineHeight: 18,
-    },
-
     cameraButton: {
         width: 84,
         height: 84,
@@ -261,7 +259,6 @@ const styles = StyleSheet.create({
     },
 
     cameraText:{
-        color: "#E7EEF4",
         fontSize: 12,
         lineHeight: 18,
         textAlign: 'center',

@@ -10,6 +10,7 @@ import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { fetchMobileContent } from '@/services/mobileContent'
 import { SKILL_ID } from '@/constants/config';
+import { NewsCardImage } from '@/components/news-card-image';
 
 const EVENT_TITLE_LINE_HEIGHT = 20;
 
@@ -53,6 +54,7 @@ type CalendarItem = {
   skill_id: string;
   link_url?: string;
   link_button?: string;
+  appointment_required?: boolean;
 }
 
 function formatClock(value: string) {
@@ -82,11 +84,13 @@ function EventCard({
   const [stackTitle, setStackTitle] = useState(false);
   const cardWidthRef = useRef(0);
 
-  const timeLabel = event.all_day
-    ? 'All day'
-    : `${formatClock(event.start)} - ${formatClock(event.end)}`;
+  const timeLabel = event.appointment_required
+    ? 'Appointment Required'
+    : event.all_day
+      ? 'All day'
+      : `${formatClock(event.start)} - ${formatClock(event.end)}`;
 
-  const accessibilityLabel = [event.title, event.loc, timeLabel]
+  const accessibilityLabel = [event.title, timeLabel, event.loc]
     .filter(Boolean)
     .join(', ');
 
@@ -211,6 +215,13 @@ function EventCard({
               </ThemedText>
             )}
 
+            <ThemedText
+              style={styles.eventMeta}
+              lightColor="#12304A"
+              darkColor="#12304A"
+            >
+              {timeLabel}
+            </ThemedText>
             {event.loc ? (
               <ThemedText
                 style={styles.eventMeta}
@@ -220,16 +231,6 @@ function EventCard({
                 {event.loc}
               </ThemedText>
             ) : null}
-
-            <ThemedText
-              style={styles.eventMeta}
-              lightColor="#12304A"
-              darkColor="#12304A"
-            >
-              {event.all_day
-                ? 'All day'
-                : `${formatClock(event.start)} - ${formatClock(event.end)}`}
-            </ThemedText>
           </ThemedView>
 
           <View style={styles.eventChevronSlot}>
@@ -467,15 +468,6 @@ export default function HomeScreen() {
         />
       }
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={styles.headerText}
-        >
-          Annoucements
-        </ThemedText>
-      </ThemedView>
-
       {/* FILTER BUTTONS */}
       <ThemedView style={styles.filterContainer}>
         {['Alerts', 'Calendar', 'News'].map((filter) => {
@@ -546,14 +538,16 @@ export default function HomeScreen() {
       {(selectedFilters.length === 0 ||
         selectedFilters.includes('Calendar')) && (
         <>
-          <ThemedView style={styles.titleContainer}>
-            <ThemedText
-              type="title"
-              style={styles.headerText}
-            >
-              Upcoming Events
-            </ThemedText>
-          </ThemedView>
+          {selectedFilters.length === 0 ? (
+            <ThemedView style={styles.titleContainer}>
+              <ThemedText
+                type="title"
+                style={styles.headerText}
+              >
+                Upcoming Events
+              </ThemedText>
+            </ThemedView>
+          ) : null}
 
           {calendarItems.map((event) => (
             <EventCard
@@ -579,14 +573,16 @@ export default function HomeScreen() {
       {(selectedFilters.length === 0 ||
         selectedFilters.includes('News')) && (
         <>
-          <ThemedView style={styles.titleContainer}>
-            <ThemedText
-              type="title"
-              style={styles.headerText}
-            >
-              News
-            </ThemedText>
-          </ThemedView>
+          {selectedFilters.length === 0 ? (
+            <ThemedView style={styles.titleContainer}>
+              <ThemedText
+                type="title"
+                style={styles.headerText}
+              >
+                News
+              </ThemedText>
+            </ThemedView>
+          ) : null}
 
           {newsItems.map((item) => {
             const imageUrl = item.video_url?.[0];
@@ -613,11 +609,9 @@ export default function HomeScreen() {
                   ]}
                 >
                   {imageUrl ? (
-                    <Image
-                      source={{ uri: imageUrl }}
-                      style={styles.newsImage}
-                      contentFit="cover"
-                    />
+                    <View style={styles.newsImageWrap}>
+                      <NewsCardImage uri={imageUrl} backgroundColor="#456781" />
+                    </View>
                   ) : null}
 
                   <ThemedText
@@ -749,11 +743,9 @@ const styles = StyleSheet.create({
     position: 'absolute'
   },
 
-  newsImage: {
+  newsImageWrap: {
     width: '100%',
-    height: 160,
-    borderRadius: 12,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   alertHeader: {

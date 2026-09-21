@@ -6,10 +6,19 @@ import { ThemedView } from "@/components/themed-view";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FAQDetail() {
-    const { id, question, answer, read_more, tags, updatedAt } = useLocalSearchParams();
+    const { id, question, answer, mobile, read_more, tags, updatedAt } = useLocalSearchParams();
     const parsedTags = typeof tags === "string" ? JSON.parse(tags) : [];
     const router = useRouter();
     const [showReadMore, setShowReadMore] = useState(false);
+
+    const questionText = typeof question === "string" ? question : "";
+    const title = questionText.split(",")[0].trim();
+    const mobileText =
+        typeof mobile === "string" && mobile.trim().length > 0
+            ? mobile
+            : typeof answer === "string"
+                ? answer
+                : "";
 
     const hasReadMore = 
         typeof read_more === "string" && read_more.trim().length > 0;
@@ -62,7 +71,7 @@ export default function FAQDetail() {
                     resizeMode="contain"
                 />
 
-                <ThemedText type="title" style={styles.title}>{question}</ThemedText>
+                <ThemedText type="title" style={styles.title}>{title}</ThemedText>
 
                 <View style={styles.tagContainer}>
                     {parsedTags.map((tag: any, index: number) => (
@@ -108,7 +117,7 @@ export default function FAQDetail() {
                 </View>
 
                 <ThemedText style={styles.answer}>
-                    {answer}
+                    {mobileText}
                 </ThemedText>
 
                 {hasReadMore && (
