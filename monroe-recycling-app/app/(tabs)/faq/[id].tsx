@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, TouchableOpacity, Image, View, Linking } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { HtmlBody } from "@/components/html-body";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FAQDetail() {
@@ -122,9 +123,7 @@ export default function FAQDetail() {
                     ))}
                 </View>
 
-                <ThemedText style={styles.answer}>
-                    {mobileText}
-                </ThemedText>
+                <HtmlBody html={mobileText} style={styles.answer} />
 
                 {hasReadMore && (
                     <>
