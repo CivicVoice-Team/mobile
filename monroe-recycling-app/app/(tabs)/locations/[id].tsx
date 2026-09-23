@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { HtmlBody } from "@/components/html-body";
 import { SKILL_ID } from "@/constants/config";
+import { Fonts } from "@/constants/theme";
 import { fetchLocations, getLocationImageUrl } from "@/services/locations";
 import { LocationItem } from "@/types/location";
 
@@ -82,47 +84,58 @@ export default function LocationsDetail() {
   const phone = location.phone?.trim() ?? "";
   const about = location.about?.trim() ?? "";
   const tags = location.tags ?? [];
+  const imageUrl = getLocationImageUrl(
+    location.location_id,
+    location.imageCacheKey
+  );
   const isLocationTag = (tag: LocationItem["tags"][number]) =>
     tag.type === "maps" || tag.icon === "location";
   const locationTags = tags.filter(isLocationTag);
   const displayTags = tags.filter((tag) => !isLocationTag(tag));
   const showBack = locationCount > 1;
 
-  const renderTag = (tag: LocationItem["tags"][number], index: number) => (
-    <TouchableOpacity
-      key={`${tag.name}-${index}`}
-      style={[
-        styles.detailTag,
-        {
-          backgroundColor:
-            TAG_COLORS[tag.color as keyof typeof TAG_COLORS] ?? "#3FA34D",
-        },
-      ]}
-      onPress={async () => {
-        const url = getTagUrl(tag);
+  const renderTag = (tag: LocationItem["tags"][number], index: number) => {
+    const iconName = tag.icon
+      ? TAG_ICONS[tag.icon as keyof typeof TAG_ICONS]
+      : undefined;
 
-        if (!url) return;
+    return (
+      <TouchableOpacity
+        key={`${tag.name}-${index}`}
+        style={[
+          styles.detailTag,
+          {
+            backgroundColor:
+              TAG_COLORS[tag.color as keyof typeof TAG_COLORS] ?? "#3FA34D",
+          },
+        ]}
+        onPress={async () => {
+          const url = getTagUrl(tag);
 
-        const supported = await Linking.canOpenURL(url);
+          if (!url) return;
 
-        if (supported) {
-          await Linking.openURL(url);
-        }
-      }}
-    >
-      <View style={styles.tagContent}>
-        {tag.icon && TAG_ICONS[tag.icon as keyof typeof TAG_ICONS] && (
-          <Ionicons
-            name={TAG_ICONS[tag.icon as keyof typeof TAG_ICONS]}
-            size={14}
-            color="white"
-            style={styles.tagIcon}
-          />
-        )}
-        <ThemedText style={styles.detailTagText}>{tag.name}</ThemedText>
-      </View>
-    </TouchableOpacity>
-  );
+          const supported = await Linking.canOpenURL(url);
+
+          if (supported) {
+            await Linking.openURL(url);
+          }
+        }}
+      ><View style={styles.tagContent}>{[
+          iconName ? (
+            <Ionicons
+              key="icon"
+              name={iconName}
+              size={14}
+              color="white"
+              style={styles.tagIcon}
+            />
+          ) : null,
+          <ThemedText key="label" style={styles.detailTagText}>
+            {tag.name}
+          </ThemedText>,
+        ]}</View></TouchableOpacity>
+    );
+  };
 
   return (
     <ThemedView style={{ flex: 1, backgroundColor: "#e2f1e5" }}>
@@ -138,7 +151,8 @@ export default function LocationsDetail() {
             <Ionicons name="location" size={48} color="#456B55" />
           ) : (
             <Image
-              source={{ uri: getLocationImageUrl(location.location_id) }}
+              key={imageUrl}
+              source={{ uri: imageUrl }}
               style={styles.heroImageFill}
               resizeMode="contain"
               onError={() => setImageFailed(true)}
@@ -199,7 +213,7 @@ export default function LocationsDetail() {
             <ThemedText type="subtitle" style={styles.heading}>
               About
             </ThemedText>
-            <ThemedText style={styles.body}>{about}</ThemedText>
+            <HtmlBody html={about} style={[styles.body, { fontFamily: Fonts.sans }]} />
           </>
         )}
       </ScrollView>

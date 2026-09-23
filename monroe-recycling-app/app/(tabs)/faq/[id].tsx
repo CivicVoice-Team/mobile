@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, TouchableOpacity, Image, View, Linking } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { HtmlBody } from "@/components/html-body";
@@ -10,6 +11,7 @@ export default function FAQDetail() {
     const { id, question, answer, mobile, read_more, tags, updatedAt } = useLocalSearchParams();
     const parsedTags = typeof tags === "string" ? JSON.parse(tags) : [];
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const [showReadMore, setShowReadMore] = useState(false);
 
     const isLocationTag = (tag: any) =>
@@ -67,8 +69,17 @@ export default function FAQDetail() {
 
     return (
         <ThemedView style={{ flex: 1 }}>
-            <ScrollView contentContainerStyle={styles.container}>
-                <TouchableOpacity onPress={() => router.back()}>
+            <ScrollView
+                contentContainerStyle={[
+                    styles.container,
+                    { paddingTop: Math.max(100, insets.top + 72) },
+                ]}
+            >
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={styles.backButton}
+                    hitSlop={8}
+                >
                     <Ionicons name="arrow-back" size={24} color="#456781" />
                 </TouchableOpacity>
 
@@ -203,6 +214,11 @@ const styles = StyleSheet.create({
     container: {
         padding: 20,
         paddingTop: 100
+    },
+
+    backButton: {
+        alignSelf: "flex-start",
+        marginBottom: 4,
     },
 
     answer: {

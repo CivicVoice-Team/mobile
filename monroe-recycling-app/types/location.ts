@@ -16,4 +16,5 @@ export type LocationItem = {
   phone: string;
   homophones: string[];
   tags: Tag[];
+  imageCacheKey: string;
 };
