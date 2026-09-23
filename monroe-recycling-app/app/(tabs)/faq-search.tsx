@@ -91,7 +91,7 @@ function FaqSearchCard({
                                 <Ionicons
                                     key={tagIcon.iconName}
                                     name={tagIcon.iconName}
-                                    size={16}
+                                    size={20}
                                     color={tagIcon.color}
                                     style={styles.tagIcon}
                                 />
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginTop: 4,
-        minHeight: 18,
+        minHeight: 22,
     },
 
     tagIcons: {
