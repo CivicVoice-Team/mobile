@@ -345,15 +345,16 @@ export default function HomeScreen() {
   const [upcomingNotifications, setUpcomingNotifications] = useState<NotificationItem[]>([]);
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [alertsLoaded, setAlertsLoaded] = useState(false);
+  const [calendarLoaded, setCalendarLoaded] = useState(false);
+  const [newsLoaded, setNewsLoaded] = useState(false);
 
   // Filter state
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
-    async function loadContent() {
-      // Mobile Content
+    async function loadMobileContent() {
       const data: MobileContentItem[] = await fetchMobileContent(SKILL_ID);
-
       const mapped: Record<string, string> = {};
 
       data.forEach((item) => {
@@ -361,37 +362,39 @@ export default function HomeScreen() {
       });
 
       setMobileContent(mapped);
+    }
 
-      // Notification Content
+    async function loadNotifications() {
       try {
         const notifications = await fetchNotifications(SKILL_ID);
         const now = new Date();
-
-        const upcomingNotifications = notifications
+        const upcoming = notifications
           .filter((notification) => isUpcomingNotification(notification, now))
           .sort(sortNotificationsByDate);
 
-        setTopNotification(upcomingNotifications[0] ?? null);
-        setUpcomingNotifications(upcomingNotifications);
+        setTopNotification(upcoming[0] ?? null);
+        setUpcomingNotifications(upcoming);
       } catch (err) {
         console.error("Notification fetch failed:", err);
+      } finally {
+        setAlertsLoaded(true);
       }
+    }
 
-      // News Content
+    async function loadNews() {
       try {
         const rawNews = await fetchNews(SKILL_ID);
-
-        const filteredNews = getLastYearNews(rawNews);
-
-        setNewsItems(filteredNews);
+        setNewsItems(getLastYearNews(rawNews));
       } catch (err) {
         console.error("News fetch failed:", err);
+      } finally {
+        setNewsLoaded(true);
       }
+    }
 
-      // Calendar Content
+    async function loadCalendar() {
       try {
         const events = await fetchCalendar(SKILL_ID);
-
         const upcomingEvents = events
           .filter((event) => new Date(event.end) >= new Date())
           .sort(
@@ -403,10 +406,15 @@ export default function HomeScreen() {
         setCalendarItems(upcomingEvents);
       } catch (err) {
         console.error("Calendar fetch failed:", err);
+      } finally {
+        setCalendarLoaded(true);
       }
     }
 
-    loadContent();
+    loadMobileContent();
+    loadNotifications();
+    loadCalendar();
+    loadNews();
   }, []);
 
   // Filter behavior:
@@ -546,7 +554,7 @@ export default function HomeScreen() {
 
       {/* ALERTS */}
 
-      {(selectedFilters.length === 0 ||
+      {alertsLoaded && (selectedFilters.length === 0 ||
         selectedFilters.includes('Alerts')) && (
         selectedFilters.includes('Alerts') ? (
           upcomingNotifications.map((notification) => (
@@ -568,7 +576,7 @@ export default function HomeScreen() {
 
       {/* CALENDAR */}
 
-      {(selectedFilters.length === 0 ||
+      {calendarLoaded && (selectedFilters.length === 0 ||
         selectedFilters.includes('Calendar')) && (
         <>
           {selectedFilters.length === 0 ? (
@@ -603,7 +611,7 @@ export default function HomeScreen() {
 
       {/* NEWS */}
 
-      {(selectedFilters.length === 0 ||
+      {newsLoaded && (selectedFilters.length === 0 ||
         selectedFilters.includes('News')) && (
         <>
           {selectedFilters.length === 0 ? (
