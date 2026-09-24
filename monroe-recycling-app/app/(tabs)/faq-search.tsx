@@ -21,6 +21,7 @@ const TAG_ICONS = {
     clock: "time",
     location: "location",
     "information-circle": "information-circle",
+    new: "sparkles",
 } as const;
 
 const TAG_COLORS = {
@@ -33,16 +34,12 @@ const TAG_COLORS = {
     gray: "#6B7280",
 };
 
-function isDefaultThumbnailIcon(icon?: string) {
-    return icon === "caution" || icon === "card" || icon === "calendar";
-}
-
 function getUniqueCardTagIcons(tags: FAQItem["tags"] = []) {
     const seen = new Set<string>();
     const icons: { iconName: (typeof TAG_ICONS)[keyof typeof TAG_ICONS]; color: string }[] = [];
 
     for (const tag of tags) {
-        if (typeof tag.thumbnail === "boolean" ? !tag.thumbnail : !isDefaultThumbnailIcon(tag.icon)) {
+        if (tag.thumbnail !== true) {
             continue;
         }
 

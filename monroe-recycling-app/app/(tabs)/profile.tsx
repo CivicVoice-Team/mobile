@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Fonts } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useThemeContext } from '@/contexts/theme-context';
 
@@ -16,14 +15,6 @@ export default function Profile() {
   return (
     <ThemedView style={{ flex: 1, backgroundColor }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText
-            type="title"
-            style={{ fontFamily: Fonts.rounded }}>
-            Settings
-          </ThemedText>
-        </ThemedView>
-
         <ThemedView style={styles.titleContainer}>
           <MyButton
             title="Language"
