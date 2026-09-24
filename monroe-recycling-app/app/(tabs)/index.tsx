@@ -14,6 +14,7 @@ import { NewsCardImage } from '@/components/news-card-image';
 
 const EVENT_TITLE_LINE_HEIGHT = 20;
 
+const EVENT_CARD_BG = '#A1D7F8';
 const EVENT_DATE_GREEN = '#DDF3E7';
 const EVENT_DATE_GREEN_TEXT = '#27704D';
 
@@ -71,6 +72,62 @@ function openEventLink(url?: string) {
   Linking.openURL(href);
 }
 
+function isUpcomingNotification(notification: NotificationItem, now: Date) {
+  if (notification.state === 'INVALID') return false;
+  if (!notification.date) return false;
+  return new Date(notification.date) >= now;
+}
+
+function sortNotificationsByDate(a: NotificationItem, b: NotificationItem) {
+  return new Date(a.date).getTime() - new Date(b.date).getTime();
+}
+
+function AlertCard({
+  notification,
+  fallbackText,
+}: {
+  notification?: NotificationItem | null;
+  fallbackText?: string;
+}) {
+  const title = notification?.title;
+  const body =
+    notification?.description ||
+    fallbackText ||
+    '';
+
+  return (
+    <ThemedView style={[styles.card, styles.redCard]}>
+      <ThemedView style={styles.alertHeader}>
+        <Ionicons
+          name="notifications"
+          size={22}
+          color="#FFFFFF"
+          style={styles.alertIcon}
+        />
+
+        {title ? (
+          <ThemedText
+            type="subtitle"
+            style={styles.alertTitle}
+            lightColor="#FFFFFF"
+          >
+            {title}
+          </ThemedText>
+        ) : null}
+      </ThemedView>
+
+      {body ? (
+        <ThemedText
+          style={styles.cardText}
+          lightColor="#FFFFFF"
+        >
+          {body}
+        </ThemedText>
+      ) : null}
+    </ThemedView>
+  );
+}
+
 function EventCard({
   event,
   isExpanded,
@@ -106,8 +163,8 @@ function EventCard({
   return (
     <ThemedView
       style={styles.eventCard}
-      lightColor="#58ADE0"
-      darkColor="#58ADE0"
+      lightColor={EVENT_CARD_BG}
+      darkColor={EVENT_CARD_BG}
       onLayout={(e) => {
         const width = Math.round(e.nativeEvent.layout.width);
 
@@ -132,8 +189,8 @@ function EventCard({
         {stackTitle ? (
           <ThemedView
             style={styles.eventTitleRow}
-            lightColor="#58ADE0"
-            darkColor="#58ADE0"
+            lightColor={EVENT_CARD_BG}
+            darkColor={EVENT_CARD_BG}
           >
             <ThemedText
               type="defaultSemiBold"
@@ -150,8 +207,8 @@ function EventCard({
 
         <ThemedView
           style={styles.eventBodyRow}
-          lightColor="#58ADE0"
-          darkColor="#58ADE0"
+          lightColor={EVENT_CARD_BG}
+          darkColor={EVENT_CARD_BG}
         >
           <ThemedView
             style={styles.eventDateBadge}
@@ -177,8 +234,8 @@ function EventCard({
 
           <ThemedView
             style={styles.eventSummary}
-            lightColor="#58ADE0"
-            darkColor="#58ADE0"
+            lightColor={EVENT_CARD_BG}
+            darkColor={EVENT_CARD_BG}
           >
             <View
               pointerEvents="none"
@@ -242,8 +299,8 @@ function EventCard({
       {isExpanded && (event.desc || event.link_button?.trim()) ? (
         <ThemedView
           style={styles.eventDetails}
-          lightColor="#58ADE0"
-          darkColor="#58ADE0"
+          lightColor={EVENT_CARD_BG}
+          darkColor={EVENT_CARD_BG}
         >
           {event.desc ? (
             <ThemedText
@@ -285,6 +342,7 @@ export default function HomeScreen() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [topNotification, setTopNotification] =
     useState<NotificationItem | null>(null);
+  const [upcomingNotifications, setUpcomingNotifications] = useState<NotificationItem[]>([]);
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
@@ -307,26 +365,14 @@ export default function HomeScreen() {
       // Notification Content
       try {
         const notifications = await fetchNotifications(SKILL_ID);
-
         const now = new Date();
 
-        const nextNotification = notifications
-          .filter((n) => {
-            if (n.state === "INVALID") return false;
+        const upcomingNotifications = notifications
+          .filter((notification) => isUpcomingNotification(notification, now))
+          .sort(sortNotificationsByDate);
 
-            const notificationDate = new Date(n.date);
-
-            return notificationDate >= now;
-          })
-          .sort(
-            (a, b) =>
-              new Date(a.date).getTime() -
-              new Date(b.date).getTime()
-          )[0];
-
-        if (nextNotification) {
-          setTopNotification(nextNotification);
-        }
+        setTopNotification(upcomingNotifications[0] ?? null);
+        setUpcomingNotifications(upcomingNotifications);
       } catch (err) {
         console.error("Notification fetch failed:", err);
       }
@@ -502,35 +548,22 @@ export default function HomeScreen() {
 
       {(selectedFilters.length === 0 ||
         selectedFilters.includes('Alerts')) && (
-        <ThemedView style={[styles.card, styles.redCard]}>
-          <ThemedView style={styles.alertHeader}>
-            <Ionicons
-              name="notifications"
-              size={22}
-              color="#FFFFFF"
-              style={styles.alertIcon}
+        selectedFilters.includes('Alerts') ? (
+          upcomingNotifications.map((notification) => (
+            <AlertCard
+              key={notification.date}
+              notification={notification}
             />
-
-            {topNotification?.title ? (
-              <ThemedText
-                type="subtitle"
-                style={styles.alertTitle}
-                lightColor="#FFFFFF"
-              >
-                {topNotification.title}
-              </ThemedText>
-            ) : null}
-          </ThemedView>
-
-          <ThemedText
-            style={styles.cardText}
-            lightColor="#FFFFFF"
-          >
-            {topNotification?.description ||
+          ))
+        ) : (
+          <AlertCard
+            notification={topNotification}
+            fallbackText={
               mobileContent.alert_box ||
-              "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."}
-          </ThemedText>
-        </ThemedView>
+              "This is another important update or alert message. The Civicvoice web dashboard will allow you to customize the message displayed here."
+            }
+          />
+        )
       )}
 
       {/* CALENDAR */}
@@ -766,7 +799,7 @@ const styles = StyleSheet.create({
   },
 
   eventCard: {
-    backgroundColor: '#58ADE0',
+    backgroundColor: EVENT_CARD_BG,
     borderRadius: 12,
     marginBottom: 10,
     overflow: 'hidden',

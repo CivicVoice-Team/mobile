@@ -33,17 +33,16 @@ const TAG_COLORS = {
     gray: "#6B7280",
 };
 
+function isDefaultThumbnailIcon(icon?: string) {
+    return icon === "caution" || icon === "card" || icon === "calendar";
+}
+
 function getUniqueCardTagIcons(tags: FAQItem["tags"] = []) {
     const seen = new Set<string>();
     const icons: { iconName: (typeof TAG_ICONS)[keyof typeof TAG_ICONS]; color: string }[] = [];
 
     for (const tag of tags) {
-        if (
-            tag.icon === "leaf" ||
-            tag.icon === "location" ||
-            tag.type === "maps" ||
-            tag.icon === "information-circle"
-        ) {
+        if (typeof tag.thumbnail === "boolean" ? !tag.thumbnail : !isDefaultThumbnailIcon(tag.icon)) {
             continue;
         }
 
@@ -91,7 +90,7 @@ function FaqSearchCard({
                                 <Ionicons
                                     key={tagIcon.iconName}
                                     name={tagIcon.iconName}
-                                    size={20}
+                                    size={24}
                                     color={tagIcon.color}
                                     style={styles.tagIcon}
                                 />
@@ -264,7 +263,7 @@ const styles = StyleSheet.create({
     },
 
     card: {
-        backgroundColor: "#58ADE0",
+        backgroundColor: "#A1D7F8",
         padding: 14,
         borderRadius: 12,
         marginBottom: 12,
@@ -283,7 +282,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginTop: 4,
-        minHeight: 22,
+        minHeight: 26,
     },
 
     tagIcons: {

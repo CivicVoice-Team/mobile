@@ -4,6 +4,7 @@ export type FAQTag = {
     icon?: string;
     color?: string;
     type?: string;
+    thumbnail?: boolean;
 };
 
 export type FAQItem = {
