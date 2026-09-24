@@ -18,6 +18,10 @@ function LocationCard({
     onPress: () => void;
 }) {
     const [imageFailed, setImageFailed] = useState(false);
+    const imageUrl = getLocationImageUrl(
+        location.location_id,
+        location.imageCacheKey
+    );
 
     return (
         <Pressable style={styles.card} onPress={onPress}>
@@ -26,7 +30,8 @@ function LocationCard({
                     <Ionicons name="location" size={28} color="#12304A" />
                 ) : (
                     <Image
-                        source={{ uri: getLocationImageUrl(location.location_id) }}
+                        key={imageUrl}
+                        source={{ uri: imageUrl }}
                         style={styles.imageFill}
                         resizeMode="contain"
                         onError={() => setImageFailed(true)}
