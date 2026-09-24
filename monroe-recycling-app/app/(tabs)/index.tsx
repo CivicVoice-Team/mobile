@@ -664,11 +664,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: '#58ADE0',
   },
 
   filterButtonSelected: {
-    backgroundColor: '#58ADE0',
+    backgroundColor: 'transparent',
   },
 
   filterButtonText: {
