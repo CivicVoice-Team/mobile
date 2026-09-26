@@ -12,7 +12,6 @@ import {
 import {
   CameraView,
   useCameraPermissions,
-  CameraCapturedPicture,
 } from "expo-camera";
 import * as FileSystem from "expo-file-system";
 import { detectImage } from "@/services/rekognition";
@@ -20,24 +19,34 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SKILL_ID } from "@/constants/config";
 import { saveImageSearch } from "@/services/saveImage";
+import * as ImagePicker from "expo-image-picker";
 
 type RekognitionLabel = {
   name: string;
   confidence: number;
 };
 
+type Photo = {
+    uri: string;
+    width: number;
+    height: number;
+};  
+
 export default function Camera() {
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
   const [permission, requestPermission] = useCameraPermissions();
-  const [photo, setPhoto] = useState<CameraCapturedPicture | null>(null);
+  const [photo, setPhoto] = useState<Photo | null>(null);  
   const [labels, setLabels] = useState<RekognitionLabel[]>([]);
   const [imageId, setImageId] = useState<string | null>(null);
   const [imageKey, setImageKey] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isImageExpanded, setIsImageExpanded] = useState(false);
   const [isNotInListModalVisible, setIsNotInListModalVisible] = useState(false);
+  const [showCameraIntro, setShowCameraIntro] = useState(true);
+  const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back');
+  const [flashEnabled, setFlashEnabled] = useState(false);
 
   if (!permission) {
     return (
@@ -81,6 +90,22 @@ export default function Camera() {
       setIsCapturing(false);
     }
   };
+
+  const pickImage = async () => {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    allowsEditing: false,
+    quality: 0.8,
+  });
+
+  if (!result.canceled && result.assets.length > 0) {
+    setPhoto({
+      uri: result.assets[0].uri,
+      width: result.assets[0].width,
+      height: result.assets[0].height,
+    });
+  }
+};
 
   const usePhoto = async () => {
     console.log("Use Photo pressed");
@@ -128,6 +153,7 @@ export default function Camera() {
       console.error("No image ID available");
       return;
     }
+    
 
     try {
       setIsCapturing(true);
@@ -184,7 +210,7 @@ export default function Camera() {
     setPhoto(null);
     setLabels([]);
     router.push("/faq-search");
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -354,23 +380,179 @@ export default function Camera() {
         // ----------------------------------------
         // CAMERA SCREEN
         // ----------------------------------------
-        <>
-          <CameraView
-            ref={cameraRef}
-            style={styles.camera}
-            facing="back"
+  <View style={styles.cameraScreen}>
+
+    {/* TOP HEADER */}
+    <View style={styles.topHeader}>
+      <Text style={styles.appTitle}>
+        Monroe County Recycling
+      </Text>
+
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoText}>
+          ADAM M. BELLO
+        </Text>
+      </View>
+
+      <Pressable
+        style={styles.settingsButton}
+        onPress={() => router.push("/profile")}
+      >
+        <Ionicons
+          name="settings"
+          size={23}
+          color="white"
+        />
+      </Pressable>
+    </View>
+
+
+    {/* CAMERA AREA */}
+    <View style={styles.cameraArea}>
+
+      <CameraView
+        ref={cameraRef}
+        style={styles.camera}
+        facing={cameraFacing}
+        enableTorch={flashEnabled}
+      />
+
+      {/* FLASH */}
+      <Pressable
+        style={styles.flashButton}
+        onPress={() =>
+          setFlashEnabled((current) => !current)
+        }
+      >
+        <Ionicons
+          name={flashEnabled ? "flash" : "flash-outline"}
+          size={26}
+          color="white"
+        />
+      </Pressable>
+
+
+      {/* SCANNING BRACKETS */}
+      <View style={styles.scanFrame} pointerEvents="none">
+        <View style={[styles.corner, styles.topLeft]} />
+        <View style={[styles.corner, styles.topRight]} />
+        <View style={[styles.corner, styles.bottomLeft]} />
+        <View style={[styles.corner, styles.bottomRight]} />
+      </View>
+
+      {/* BACK / CLOSE BUTTON */}
+      <Pressable
+        style={styles.closeIntroButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons
+          name="close"
+          size={32}
+          color="white"
+        />
+      </Pressable>
+
+
+      {/* INTRODUCTION OVERLAY */}
+      {showCameraIntro && (
+        <View style={styles.introOverlay}>
+
+          <Pressable
+            style={styles.closeIntroButton}
+            onPress={() => setShowCameraIntro(false)}
+          >
+            <Ionicons
+              name="close"
+              size={32}
+              color="white"
+            />
+          </Pressable>
+
+          <Ionicons
+            name="camera-outline"
+            size={48}
+            color="#DDEBE7"
           />
 
-          <View style={styles.controls}>
-            <Pressable
-              style={styles.captureButton}
-              onPress={takePicture}
-              disabled={isCapturing}
+          <Text style={styles.introText}>
+            Before using our AI camera,
+            {"\n"}
+            place the item you'd like to
+            {"\n"}
+            recycle on a well-lit,
+            {"\n"}
+            contrasting surface.
+          </Text>
+
+          <View style={styles.introDivider} />
+
+          <Pressable
+            style={styles.continueButton}
+            onPress={() => setShowCameraIntro(false)}
+          >
+            <Text style={styles.continueButtonText}>
+              Continue
+            </Text>
+          </Pressable>
+
+        </View>
+      )}
+
+      
+
+
+      {/* CAMERA CONTROLS */}
+      {!showCameraIntro && (
+        <View style={styles.cameraControls}>
+
+          {/* GALLERY */}
+          <Pressable
+            style={styles.sideCameraButton}
+            onPress={pickImage}
+          >
+            <Ionicons
+              name="image-outline"
+              size={25}
+              color="white"
             />
-          </View>
-        </>
+          </Pressable>
+
+
+          {/* SHUTTER */}
+          <Pressable
+            style={styles.captureButton}
+            onPress={takePicture}
+            disabled={isCapturing}
+          >
+            <View style={styles.captureInner} />
+          </Pressable>
+
+
+          {/* FLIP CAMERA */}
+          <Pressable
+            style={styles.sideCameraButton}
+            onPress={() =>
+              setCameraFacing((current) =>
+                current === 'back'
+                  ? 'front'
+                  : 'back'
+              )
+            }
+          >
+            <Ionicons
+              name="sync-outline"
+              size={29}
+              color="white"
+            />
+          </Pressable>
+
+        </View>
       )}
     </View>
+
+  </View>
+  )}
+</View>
   );
 }
 
@@ -379,24 +561,233 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  camera: {
+  cameraScreen: {
+    flex: 1,
+    backgroundColor: "#111111",
+  },
+
+  topHeader:{
+    height: 76,
+    backgroundColor: "#2162AE",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    justifyContent: "space-between",
+  },
+
+  appTitle:{
+    color: "white",
+    fontSize: 15,
+    fontWeight: "700",
     flex: 1,
   },
+  
+  logoContainer:{
+    alignItems: "center",
+    justifyContent: "center",
+    width: 75,
+  },
+
+  logoText:{
+    color: "white",
+    fontSize: 6,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+
+  settingsButton: {
+    width: 40,
+    alignItems: "flex-end",
+  },
+
+  cameraArea: {
+    flex: 1,
+    marginHorizontal: 14,
+    marginTop: 34,
+    marginBottom: 25,
+    borderRadius: 20,
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: "#222222",
+  },
+
+  camera:{
+    flex: 1,
+  },
+
+  flashButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 10,
+    padding: 5,
+  },
+
+  scanFrame: {
+    position: "absolute",
+    top: "25%",
+    left: "15%",
+    right: "15%",
+    height: "45%",
+  },
+
+  corner: {
+    position: "absolute",
+    width: 38,
+    height: 38,
+    borderColor: "#DDEBE7",
+  },
+
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderTopLeftRadius: 5,
+  },
+
+  topRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderTopRightRadius: 5,
+  },
+
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderBottomLeftRadius: 5,
+  },
+
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderBottomRightRadius: 5,
+  },
+
+  cameraControls: {
+    position: "absolute",
+    bottom: 15,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingHorizontal: 25,
+  },
+
+  sideCameraButton: {
+    width: 45,
+    height: 45,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  captureButton: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: "#E8F5EF",
+    borderWidth: 4,
+    borderColor: "#B8C8C2",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  captureInner: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "#E8F5EF",
+  },
+
+  bottomNavigation: {
+    height: 65,
+    backgroundColor: "#2162AE",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+
+  navButton: {
+    width: 70,
+    height: 65,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+
+  activeIndicator: {
+    position: "absolute",
+    bottom: -1,
+    width: 28,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "white",
+  },
+
+  introOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.48)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+  },
+
+  closeIntroButton: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    zIndex: 20,
+  },
+
+  introText: {
+    color: "white",
+    fontSize: 17,
+    lineHeight: 22,
+    textAlign: "center",
+    marginTop: 25,
+    fontWeight: "500",
+  },
+
+  introDivider: {
+    width: "100%",
+    height: 2,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    marginTop: 14,
+    marginBottom: 14,
+  },
+
+  continueButton: {
+    width: 112,
+    height: 28,
+    borderRadius: 5,
+    backgroundColor: "#1264C5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  continueButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+
 
   controls: {
     position: "absolute",
     bottom: 50,
     width: "100%",
     alignItems: "center",
-  },
-
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "white",
-    borderWidth: 5,
-    borderColor: "#ccc",
   },
 
   center: {
@@ -631,5 +1022,5 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 16,
     fontWeight: "600"
-  }
+  },
 });
