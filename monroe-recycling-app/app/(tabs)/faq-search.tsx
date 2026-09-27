@@ -80,6 +80,16 @@ function FaqSearchCard({
     return (
         <Pressable style={styles.card} onPress={onPress}>
 
+            {/* NEW BADGE */}
+                {isNew && (
+                    <View style={styles.newBadge}>
+                        <Text style={styles.newBadgeText}>
+                            NEW
+                        </Text>
+                    </View>
+                )}
+
+
             {/* THUMBNAIL */}
             <View style={styles.imageContainer}>
                 <Image
@@ -88,14 +98,7 @@ function FaqSearchCard({
                     resizeMode="contain"
                 />
 
-                {/* NEW BADGE */}
-                {isNew && (
-                    <View style={styles.newBadge}>
-                        <Text style={styles.newBadgeText}>
-                            NEW
-                        </Text>
-                    </View>
-                )}
+                
             </View>
 
             <View style={styles.textContainer}>
