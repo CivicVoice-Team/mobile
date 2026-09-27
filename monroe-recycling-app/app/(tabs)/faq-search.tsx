@@ -292,6 +292,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         flexDirection: "row",
         alignItems: "center",
+        position: "relative",
     },
 
     question: {
@@ -441,13 +442,14 @@ const styles = StyleSheet.create({
 
     newBadge: {
         position: "absolute",
-        top: -8,
-        right: -8,
+        top: 0,
+        right: 0,
         backgroundColor: "#E5A600",
         paddingHorizontal: 9,
         paddingVertical: 5,
-        borderTopRightRadius: 10,
+        borderTopRightRadius: 12,
         borderBottomLeftRadius: 10,
+        zIndex: 10,
     },
 
     newBadgeText: {
