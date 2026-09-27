@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useRouter } from 'expo-router';
-import { FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -68,18 +68,41 @@ function FaqSearchCard({
     onPress: () => void;
 }) {
     const title = faq.question.split(",")[0];
-    const tagIcons = getUniqueCardTagIcons(faq.tags);
+
+    const tagIcons = getUniqueCardTagIcons(
+        faq.tags?.filter((tag) => tag.icon !== "new")
+    );
+
+    const isNew = faq.tags?.some(
+        (tag) => tag.icon === "new"
+    );
 
     return (
         <Pressable style={styles.card} onPress={onPress}>
-            <Image
-                source={{ uri: imageUrl }}
-                style={styles.image}
-                resizeMode="contain"
-            />
+
+            {/* THUMBNAIL */}
+            <View style={styles.imageContainer}>
+                <Image
+                    source={{ uri: imageUrl }}
+                    style={styles.image}
+                    resizeMode="contain"
+                />
+
+                {/* NEW BADGE */}
+                {isNew && (
+                    <View style={styles.newBadge}>
+                        <Text style={styles.newBadgeText}>
+                            NEW
+                        </Text>
+                    </View>
+                )}
+            </View>
 
             <View style={styles.textContainer}>
-                <ThemedText style={styles.question}>{title}</ThemedText>
+                <ThemedText style={styles.question}>
+                    {title}
+                </ThemedText>
+
                 {tagIcons.length > 0 && (
                     <View style={styles.cardFooter}>
                         <View style={styles.tagIcons}>
@@ -296,7 +319,7 @@ const styles = StyleSheet.create({
         height: 52,
         borderRadius: 10,
         marginRight: 12,
-        backgroundColor: "#1230$A",
+        backgroundColor: "#12304A",
     },
 
     textContainer: {
@@ -404,5 +427,29 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 15,
         lineHeight: 22
+    },
+
+        imageContainer: {
+        width: 62,
+        height: 52,
+        marginRight: 12,
+        position: "relative",
+    },
+
+    newBadge: {
+        position: "absolute",
+        top: -8,
+        right: -8,
+        backgroundColor: "#E5A600",
+        paddingHorizontal: 9,
+        paddingVertical: 5,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+    },
+
+    newBadgeText: {
+        color: "#FFFFFF",
+        fontSize: 11,
+        fontWeight: "800",
     }
 });

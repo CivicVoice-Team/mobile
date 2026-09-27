@@ -10,6 +10,8 @@ import { useThemeContext } from '@/contexts/theme-context';
 export default function Profile() {
   const { theme, toggleTheme } = useThemeContext();
   const [themeModalVisible, setThemeModalVisible] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [helpModalVisible, setHelpModalVisible] = useState(false);
   const backgroundColor = useThemeColor({}, 'background');
 
   return (
@@ -19,9 +21,41 @@ export default function Profile() {
           <MyButton
             title="Language"
             icon="globe-outline"
-            onPress={() => console.log("Language")}
+            onPress={() => setLanguageModalVisible(true)}
           />
         </ThemedView>
+
+        <Modal
+          visible={languageModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setLanguageModalVisible(false)}
+        >
+          <ThemedView style={styles.modalBackground}>
+            <ThemedView style={styles.modalBox}>
+              <ThemedText type="subtitle">
+                Language
+              </ThemedText>
+
+              <ThemedView style={styles.settingRow}>
+                <ThemedText>Dark Mode</ThemedText>
+
+                <Switch
+                  value={theme === 'dark'}
+                  onValueChange={toggleTheme}
+                />
+              </ThemedView>
+
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setLanguageModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </Pressable>
+            </ThemedView>
+          </ThemedView>
+        </Modal>
+
 
         <ThemedView style={styles.titleContainer}>
           <MyButton
@@ -66,9 +100,41 @@ export default function Profile() {
           <MyButton
             title="Help"
             icon="help-circle-outline"
-            onPress={() => console.log("Help")}
+            onPress={() => setHelpModalVisible(true)}
           />
         </ThemedView>
+
+        <Modal
+          visible={helpModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setHelpModalVisible(false)}
+        >
+          <ThemedView style={styles.modalBackground}>
+            <ThemedView style={styles.modalBox}>
+              <ThemedText type="subtitle">
+                Help
+              </ThemedText>
+
+              <ThemedView style={styles.settingRow}>
+                <ThemedText>Dark Mode</ThemedText>
+
+                <Switch
+                  value={theme === 'dark'}
+                  onValueChange={toggleTheme}
+                />
+              </ThemedView>
+
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setHelpModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </Pressable>
+            </ThemedView>
+          </ThemedView>
+        </Modal>
+
       </ScrollView>
     </ThemedView>
   );
