@@ -68,7 +68,13 @@ export function HtmlBody({ html, style }: HtmlBodyProps) {
                 }
                 .html-body p,
                 .html-body div {
-                    margin: 0 0 8px;
+                    margin: 0 0 6px;
+                }
+                .html-body p:empty,
+                .html-body div:empty {
+                    margin: 0 0 2px;
+                    min-height: 0;
+                    height: 2px;
                 }
             `}</style>
             <div

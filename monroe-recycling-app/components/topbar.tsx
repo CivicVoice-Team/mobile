@@ -45,8 +45,15 @@ export default function TopBar({ title = 'Monroe County Recycling',}: TopBarProp
                     ) : null}
                     <Text style={styles.title} numberOfLines={1}>{title}</Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push('/profile')} activeOpacity={0.7}>
-                    <Ionicons name="settings" size={22} color="white" />
+                <TouchableOpacity
+                    onPress={() => router.push('/profile')}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    style={styles.settingsButton}
+                    accessibilityRole="button"
+                    accessibilityLabel="Settings"
+                >
+                    <Ionicons name="settings" size={24} color="white" />
                 </TouchableOpacity>
             </View>
         </View>
@@ -86,5 +93,12 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         fontWeight: '600',
+    },
+    settingsButton: {
+        minWidth: 44,
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: -4,
     },
 });

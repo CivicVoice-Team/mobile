@@ -397,10 +397,13 @@ export default function Camera() {
       <Pressable
         style={styles.settingsButton}
         onPress={() => router.push("/profile")}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel="Settings"
       >
         <Ionicons
           name="settings"
-          size={23}
+          size={24}
           color="white"
         />
       </Pressable>
@@ -596,8 +599,10 @@ const styles = StyleSheet.create({
   },
 
   settingsButton: {
-    width: 40,
-    alignItems: "flex-end",
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   cameraArea: {

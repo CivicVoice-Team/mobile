@@ -148,6 +148,13 @@ function hasBlockChild(nodes: AstNode[]) {
     return nodes.some((node) => node.type === "element" && isBlock(node.tag));
 }
 
+function isVisuallyEmpty(node: AstNode): boolean {
+    if (node.type === "text") return !node.text?.trim();
+    if (node.tag === "br") return true;
+    if (!node.children.length) return true;
+    return node.children.every(isVisuallyEmpty);
+}
+
 function styleFromNode(node: AstNode, inherited: TextStyle): TextStyle {
     const next: TextStyle = { ...inherited };
     const tag = node.tag;
@@ -315,8 +322,21 @@ function BlockNode({
             ? marginFromStyle(node.attrs?.style) || 40
             : marginFromStyle(node.attrs?.style);
 
+    const empty = isVisuallyEmpty(node);
+    // Blank lines (empty <p>/<div>) get a smaller gap than real paragraphs.
+    const bottomMargin =
+        tag === "p" || tag === "div"
+            ? empty
+                ? 2
+                : 6
+            : 0;
+
+    if (empty && (tag === "p" || tag === "div")) {
+        return <View style={{ height: bottomMargin, marginLeft: indent }} />;
+    }
+
     return (
-        <View style={{ marginBottom: tag === "p" ? 8 : 0, marginLeft: indent }}>
+        <View style={{ marginBottom: bottomMargin, marginLeft: indent }}>
             {hasBlockChild(node.children) ? (
                 <Block nodes={node.children} style={nextStyle} />
             ) : (

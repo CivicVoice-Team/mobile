@@ -1,6 +1,7 @@
 import { StyleSheet, Pressable, Text, Modal, ScrollView, Switch } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -12,11 +13,15 @@ export default function Profile() {
   const [themeModalVisible, setThemeModalVisible] = useState(false);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const [newsletterModalVisible, setNewsletterModalVisible] = useState(false);
   const backgroundColor = useThemeColor({}, 'background');
+  const insets = useSafeAreaInsets();
+  // TopBar is insets.top + 50; add extra gap below it
+  const contentPaddingTop = insets.top + 50 + 28;
 
   return (
     <ThemedView style={{ flex: 1, backgroundColor }}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: contentPaddingTop }]}>
         <ThemedView style={styles.titleContainer}>
           <MyButton
             title="Language"
@@ -36,15 +41,6 @@ export default function Profile() {
               <ThemedText type="subtitle">
                 Language
               </ThemedText>
-
-              <ThemedView style={styles.settingRow}>
-                <ThemedText>Dark Mode</ThemedText>
-
-                <Switch
-                  value={theme === 'dark'}
-                  onValueChange={toggleTheme}
-                />
-              </ThemedView>
 
               <Pressable
                 style={styles.closeButton}
@@ -116,18 +112,39 @@ export default function Profile() {
                 Help
               </ThemedText>
 
-              <ThemedView style={styles.settingRow}>
-                <ThemedText>Dark Mode</ThemedText>
-
-                <Switch
-                  value={theme === 'dark'}
-                  onValueChange={toggleTheme}
-                />
-              </ThemedView>
-
               <Pressable
                 style={styles.closeButton}
                 onPress={() => setHelpModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </Pressable>
+            </ThemedView>
+          </ThemedView>
+        </Modal>
+
+        <ThemedView style={styles.titleContainer}>
+          <MyButton
+            title="Newsletter Signup"
+            icon="mail-outline"
+            onPress={() => setNewsletterModalVisible(true)}
+          />
+        </ThemedView>
+
+        <Modal
+          visible={newsletterModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setNewsletterModalVisible(false)}
+        >
+          <ThemedView style={styles.modalBackground}>
+            <ThemedView style={styles.modalBox}>
+              <ThemedText type="subtitle">
+                Newsletter Signup
+              </ThemedText>
+
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setNewsletterModalVisible(false)}
               >
                 <Text style={styles.closeButtonText}>Close</Text>
               </Pressable>
@@ -164,7 +181,6 @@ export function MyButton({ title, icon, onPress }: {
 const styles = StyleSheet.create({
   container: {
     padding: 32,
-    paddingTop: 100,
     gap: 16,
   },
   titleContainer: {

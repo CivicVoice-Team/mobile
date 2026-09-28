@@ -538,12 +538,8 @@ export default function HomeScreen() {
             >
               <ThemedText
                 style={styles.filterButtonText}
-                lightColor={
-                  isSelected ? '#FFFFFF' : '#12304A'
-                }
-                darkColor={
-                  isSelected ? '#FFFFFF' : '#12304A'
-                }
+                lightColor="#12304A"
+                darkColor="#12304A"
               >
                 {filter}
               </ThemedText>
@@ -701,15 +697,16 @@ const styles = StyleSheet.create({
   filterButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#58ADE0',
+    borderColor: EVENT_CARD_BG,
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
-    backgroundColor: '#58ADE0',
+    backgroundColor: EVENT_CARD_BG,
   },
 
   filterButtonSelected: {
-    backgroundColor: 'transparent',
+    backgroundColor: EVENT_CARD_BG,
+    borderColor: '#12304A',
   },
 
   filterButtonText: {
@@ -801,7 +798,7 @@ const styles = StyleSheet.create({
   },
 
   alertTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     flex: 1,
   },
