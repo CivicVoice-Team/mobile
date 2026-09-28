@@ -327,7 +327,7 @@ function BlockNode({
     const bottomMargin =
         tag === "p" || tag === "div"
             ? empty
-                ? 2
+                ? 8
                 : 6
             : 0;
 

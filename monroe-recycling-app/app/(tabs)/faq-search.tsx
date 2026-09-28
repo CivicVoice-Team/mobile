@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'expo-router';
 import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -133,6 +134,9 @@ export default function FAQSearchScreen() {
     const [faqs, setFaqs] = useState<FAQItem[]>([]);
     const [searchText, setSearchText] = useState("");
     const [filteredFaqs, setFilteredFaqs] = useState<FAQItem[] | null>(null);
+    const insets = useSafeAreaInsets();
+    // TopBar is insets.top + 50; add extra gap below it
+    const contentPaddingTop = insets.top + 50 + 40;
 
     const router = useRouter();
 
@@ -189,7 +193,7 @@ export default function FAQSearchScreen() {
             data={filteredFaqs ?? faqs}
             keyExtractor={(item) => item.id}
             style={{ flex: 1, backgroundColor }}
-            contentContainerStyle={[styles.container, { backgroundColor }]}
+            contentContainerStyle={[styles.container, { backgroundColor, paddingTop: contentPaddingTop }]}
             ListHeaderComponent={
                 <>
     <View style={styles.searchBar}>
@@ -282,7 +286,6 @@ export default function FAQSearchScreen() {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        paddingTop: 100,
     },
 
     card: {
@@ -323,7 +326,7 @@ const styles = StyleSheet.create({
         height: 52,
         borderRadius: 10,
         marginRight: 12,
-        backgroundColor: "#12304A",
+        backgroundColor: "transparent",
     },
 
     textContainer: {

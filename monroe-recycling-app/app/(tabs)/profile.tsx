@@ -17,7 +17,7 @@ export default function Profile() {
   const backgroundColor = useThemeColor({}, 'background');
   const insets = useSafeAreaInsets();
   // TopBar is insets.top + 50; add extra gap below it
-  const contentPaddingTop = insets.top + 50 + 28;
+  const contentPaddingTop = insets.top + 50 + 40;
 
   return (
     <ThemedView style={{ flex: 1, backgroundColor }}>
