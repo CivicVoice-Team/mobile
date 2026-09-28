@@ -28,7 +28,9 @@ export default function NewsDetail() {
                     <Ionicons name="arrow-back" size={24} color="#456781" />
                 </TouchableOpacity>
 
-                <ThemedText type="title">{title}</ThemedText>
+                <ThemedText type="title" style={styles.title}>
+                    {title}
+                </ThemedText>
 
                 <ThemedText style={styles.date}>
                     {formattedDate}
@@ -61,6 +63,11 @@ const styles = StyleSheet.create({
 
   backButton: {
     marginBottom: 16
+  },
+
+  title: {
+    fontSize: 22,
+    lineHeight: 28,
   },
 
   date: {
