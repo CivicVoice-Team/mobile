@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, type StyleProp, type TextStyle } from "react-native";
+import { Linking, StyleSheet, Text, View, type StyleProp, type TextStyle } from "react-native";
 
 import { Fonts } from "@/constants/theme";
 
@@ -37,6 +37,41 @@ const FONT_SIZE_MAP: Record<string, number> = {
 
 function looksLikeHtml(value: string) {
     return /<[a-z][\s\S]*>/i.test(value);
+}
+
+function escapePlainText(value: string) {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function linkifyPlainText(value: string) {
+    const escaped = escapePlainText(value);
+    const withLinks = escaped.replace(
+        /(https?:\/\/[^\s<]+)|(www\.[^\s<]+)/gi,
+        (match) => {
+            const href = /^https?:\/\//i.test(match) ? match : `https://${match}`;
+            return `<a href="${href}">${match}</a>`;
+        }
+    );
+    return withLinks.replace(/\n/g, "<br>");
+}
+
+function normalizeHref(href?: string) {
+    const trimmed = href?.trim() ?? "";
+    if (!trimmed) return null;
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+async function openHref(href?: string) {
+    const url = normalizeHref(href);
+    if (!url) return;
+    try {
+        await Linking.openURL(url);
+    } catch (error) {
+        console.warn(`Cannot open URL: ${url}`, error);
+    }
 }
 
 function decodeEntities(value: string) {
@@ -210,7 +245,28 @@ function InlineNode({ node, style }: { node: AstNode; style: TextStyle }) {
     if (node.tag === "br") {
         return <Text>{"\n"}</Text>;
     }
+
     const nextStyle = styleFromNode(node, style);
+
+    if (node.tag === "a") {
+        return (
+            <Text
+                style={[
+                    nextStyle,
+                    {
+                        color: "#0a7ea4",
+                        textDecorationLine: "underline",
+                    },
+                ]}
+                onPress={() => openHref(node.attrs?.href)}
+            >
+                {node.children.map((child, index) => (
+                    <InlineNode key={index} node={child} style={nextStyle} />
+                ))}
+            </Text>
+        );
+    }
+
     return (
         <Text style={nextStyle}>
             {node.children.map((child, index) => (
@@ -365,7 +421,7 @@ export function HtmlBody({ html, style }: HtmlBodyProps) {
 
     const nodes = looksLikeHtml(source)
         ? parseHtml(source)
-        : [{ type: "text" as const, text: source, children: [] }];
+        : parseHtml(linkifyPlainText(source));
 
     return (
         <View style={{ marginTop: baseStyle.marginTop ?? 0 }}>

@@ -158,9 +158,10 @@ export default function FAQDetail() {
                         </TouchableOpacity>
 
                         {showReadMore && (
-                            <ThemedText style={styles.readMoreText}>
-                                {read_more}
-                            </ThemedText>
+                            <HtmlBody
+                                html={typeof read_more === "string" ? read_more : ""}
+                                style={styles.readMoreText}
+                            />
                         )}
                     </>
                 )}

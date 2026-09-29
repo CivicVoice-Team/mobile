@@ -11,8 +11,19 @@ function escapePlainText(value: string) {
     return value
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\n/g, "<br>");
+        .replace(/>/g, "&gt;");
+}
+
+function linkifyPlainText(value: string) {
+    const escaped = escapePlainText(value);
+    const withLinks = escaped.replace(
+        /(https?:\/\/[^\s<]+)|(www\.[^\s<]+)/gi,
+        (match) => {
+            const href = /^https?:\/\//i.test(match) ? match : `https://${match}`;
+            return `<a href="${href}">${match}</a>`;
+        }
+    );
+    return withLinks.replace(/\n/g, "<br>");
 }
 
 function px(value: unknown) {
@@ -56,7 +67,7 @@ type HtmlBodyProps = {
 
 export function HtmlBody({ html, style }: HtmlBodyProps) {
     const source = html?.trim() ?? "";
-    const markup = looksLikeHtml(source) ? source : escapePlainText(source);
+    const markup = looksLikeHtml(source) ? source : linkifyPlainText(source);
 
     return (
         <>
@@ -75,6 +86,10 @@ export function HtmlBody({ html, style }: HtmlBodyProps) {
                     margin: 0 0 8px;
                     min-height: 0;
                     height: 8px;
+                }
+                .html-body a {
+                    color: #0a7ea4;
+                    text-decoration: underline;
                 }
             `}</style>
             <div

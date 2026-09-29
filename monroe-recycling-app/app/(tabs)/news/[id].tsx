@@ -5,6 +5,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useColorScheme } from "react-native";
 import { ThemedView } from "@/components/themed-view";
 import { NewsCardImage } from "@/components/news-card-image";
+import { HtmlBody } from "@/components/html-body";
 
 export default function NewsDetail() {
     const { title, description, date, imageUrl, link_url } = useLocalSearchParams();
@@ -12,6 +13,11 @@ export default function NewsDetail() {
     const colorScheme = useColorScheme();
 
     const formattedDate = date ? new Date(date as string).toLocaleDateString("en-US") : "";
+    const descriptionText = Array.isArray(description)
+        ? description[0] ?? ""
+        : typeof description === "string"
+            ? description
+            : "";
 
     return (
         <ThemedView style={{ flex: 1}}>
@@ -36,9 +42,7 @@ export default function NewsDetail() {
                     {formattedDate}
                 </ThemedText>
 
-                <ThemedText style={styles.body}>
-                    {description}
-                </ThemedText>
+                <HtmlBody html={descriptionText} style={styles.body} />
 
                 {link_url ? (
                   <TouchableOpacity
