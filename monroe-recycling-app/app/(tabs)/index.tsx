@@ -6,6 +6,7 @@ import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { HtmlBody } from '@/components/html-body';
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { fetchMobileContent } from '@/services/mobileContent'
@@ -15,8 +16,27 @@ import { NewsCardImage } from '@/components/news-card-image';
 const EVENT_TITLE_LINE_HEIGHT = 20;
 
 const EVENT_CARD_BG = '#A1D7F8';
-const EVENT_DATE_GREEN = '#DDF3E7';
-const EVENT_DATE_GREEN_TEXT = '#27704D';
+
+/** Soft badge fill + darker label, same shade as the original green date box. */
+const EVENT_DATE_COLORS: Record<
+  string,
+  { bg: string; text: string }
+> = {
+  red: { bg: '#F8E0E0', text: '#9D2C2C' },
+  orange: { bg: '#F8E8D8', text: '#A85A20' },
+  yellow: { bg: '#F7F1D4', text: '#8A7420' },
+  green: { bg: '#DDF3E7', text: '#27704D' },
+  blue: { bg: '#DDEAF8', text: '#1E5A8A' },
+  purple: { bg: '#EDE0F5', text: '#6B3A8A' },
+  gray: { bg: '#E8E8E8', text: '#555555' },
+};
+
+const DEFAULT_EVENT_DATE_COLOR = EVENT_DATE_COLORS.green;
+
+function getEventDateColor(color?: string) {
+  if (!color) return DEFAULT_EVENT_DATE_COLOR;
+  return EVENT_DATE_COLORS[color] ?? DEFAULT_EVENT_DATE_COLOR;
+}
 
 type MobileContentItem = {
   field_id: string;
@@ -52,6 +72,7 @@ type CalendarItem = {
   loc: string;
   modified?: string;
   keywords: string;
+  color?: string;
   skill_id: string;
   link_url?: string;
   link_button?: string;
@@ -140,6 +161,7 @@ function EventCard({
   const startDate = new Date(event.start);
   const [stackTitle, setStackTitle] = useState(false);
   const cardWidthRef = useRef(0);
+  const dateColor = getEventDateColor(event.color);
 
   const timeLabel = event.appointment_required
     ? 'Appointment Required'
@@ -147,7 +169,12 @@ function EventCard({
       ? 'All day'
       : `${formatClock(event.start)} - ${formatClock(event.end)}`;
 
-  const accessibilityLabel = [event.title, timeLabel, event.loc]
+  const accessibilityLabel = [
+    event.title,
+    timeLabel,
+    event.keywords?.trim(),
+    event.loc?.trim(),
+  ]
     .filter(Boolean)
     .join(', ');
 
@@ -212,21 +239,21 @@ function EventCard({
         >
           <ThemedView
             style={styles.eventDateBadge}
-            lightColor={EVENT_DATE_GREEN}
-            darkColor={EVENT_DATE_GREEN}
+            lightColor={dateColor.bg}
+            darkColor={dateColor.bg}
           >
             <ThemedText
               style={styles.eventMonth}
-              lightColor={EVENT_DATE_GREEN_TEXT}
-              darkColor={EVENT_DATE_GREEN_TEXT}
+              lightColor={dateColor.text}
+              darkColor={dateColor.text}
             >
               {startDate.toLocaleDateString([], { month: 'short' })}
             </ThemedText>
 
             <ThemedText
               style={styles.eventDay}
-              lightColor={EVENT_DATE_GREEN_TEXT}
-              darkColor={EVENT_DATE_GREEN_TEXT}
+              lightColor={dateColor.text}
+              darkColor={dateColor.text}
             >
               {startDate.getDate()}
             </ThemedText>
@@ -279,13 +306,13 @@ function EventCard({
             >
               {timeLabel}
             </ThemedText>
-            {event.loc ? (
+            {event.keywords?.trim() ? (
               <ThemedText
                 style={styles.eventMeta}
                 lightColor="#12304A"
                 darkColor="#12304A"
               >
-                {event.loc}
+                {event.keywords.trim()}
               </ThemedText>
             ) : null}
           </ThemedView>
@@ -296,20 +323,31 @@ function EventCard({
         </ThemedView>
       </Pressable>
 
-      {isExpanded && (event.desc || event.link_button?.trim()) ? (
+      {isExpanded &&
+      (event.loc?.trim() || event.desc || event.link_button?.trim()) ? (
         <ThemedView
           style={styles.eventDetails}
           lightColor={EVENT_CARD_BG}
           darkColor={EVENT_CARD_BG}
         >
-          {event.desc ? (
+          {event.loc?.trim() ? (
             <ThemedText
-              style={styles.eventDescription}
+              style={styles.eventLocation}
               lightColor="#12304A"
               darkColor="#12304A"
             >
-              {event.desc}
+              {event.loc.trim()}
             </ThemedText>
+          ) : null}
+
+          {event.desc ? (
+            <View
+              style={
+                event.loc?.trim() ? styles.eventDescriptionAfterLocation : null
+              }
+            >
+              <HtmlBody html={event.desc} style={styles.eventDescription} />
+            </View>
           ) : null}
 
           {event.link_button?.trim() ? (
@@ -319,13 +357,14 @@ function EventCard({
               onPress={() => openEventLink(event.link_url)}
               style={({ pressed }) => [
                 styles.eventLinkButton,
+                { backgroundColor: dateColor.bg },
                 pressed && styles.eventLinkButtonPressed,
               ]}
             >
               <ThemedText
                 style={styles.eventLinkButtonText}
-                lightColor={EVENT_DATE_GREEN_TEXT}
-                darkColor={EVENT_DATE_GREEN_TEXT}
+                lightColor={dateColor.text}
+                darkColor={dateColor.text}
               >
                 {event.link_button.trim()}
               </ThemedText>
@@ -586,7 +625,10 @@ export default function HomeScreen() {
             </ThemedView>
           ) : null}
 
-          {calendarItems.map((event) => (
+          {(selectedFilters.includes('Calendar')
+            ? calendarItems
+            : calendarItems.slice(0, 4)
+          ).map((event) => (
             <EventCard
               key={event.event_id}
               event={event}
@@ -921,14 +963,23 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
 
-  eventDescription: {
+  eventLocation: {
     fontSize: 14,
     lineHeight: 20,
   },
 
+  eventDescription: {
+    color: '#12304A',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  eventDescriptionAfterLocation: {
+    marginTop: 8,
+  },
+
   eventLinkButton: {
     alignItems: 'center',
-    backgroundColor: EVENT_DATE_GREEN,
     borderRadius: 10,
     marginTop: 12,
     paddingHorizontal: 16,
@@ -940,7 +991,6 @@ const styles = StyleSheet.create({
   },
 
   eventLinkButtonText: {
-    color: EVENT_DATE_GREEN_TEXT,
     fontSize: 15,
     fontWeight: '700',
   },
