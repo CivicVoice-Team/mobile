@@ -118,14 +118,14 @@ export default function FAQDetail() {
                             }}
                         >
                             <View style={styles.tagContent}>
-                                {tag.icon && TAG_ICONS[tag.icon as keyof typeof TAG_ICONS] && (
+                                {TAG_ICONS[tag.icon as keyof typeof TAG_ICONS] ? (
                                     <Ionicons
                                         name={TAG_ICONS[tag.icon as keyof typeof TAG_ICONS]}
                                         size={14}
                                         color="white"
                                         style={styles.tagIcon}
                                     />
-                                )}
+                                ) : null}
 
                                 <ThemedText style={styles.detailTagText}>
                                     {tag.name}

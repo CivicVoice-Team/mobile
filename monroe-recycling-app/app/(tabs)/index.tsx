@@ -341,13 +341,15 @@ function EventCard({
           ) : null}
 
           {event.desc ? (
-            <View
-              style={
-                event.loc?.trim() ? styles.eventDescriptionAfterLocation : null
-              }
-            >
-              <HtmlBody html={event.desc} style={styles.eventDescription} />
-            </View>
+            <HtmlBody
+              html={event.desc}
+              style={[
+                styles.eventDescription,
+                event.loc?.trim()
+                  ? styles.eventDescriptionAfterLocation
+                  : null,
+              ]}
+            />
           ) : null}
 
           {event.link_button?.trim() ? (

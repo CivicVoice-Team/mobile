@@ -1,7 +1,42 @@
+import { useEffect } from "react";
 import type { CSSProperties } from "react";
-import type { StyleProp, TextStyle } from "react-native";
+import { StyleSheet, type StyleProp, type TextStyle } from "react-native";
 
 import { Fonts } from "@/constants/theme";
+
+const HTML_BODY_STYLE_ID = "civicvoice-html-body-styles";
+
+const HTML_BODY_CSS = `
+.html-body ul,
+.html-body ol {
+    margin: 8px 0;
+    padding-left: 24px;
+}
+.html-body p,
+.html-body div {
+    margin: 0 0 6px;
+}
+.html-body p:empty,
+.html-body div:empty {
+    margin: 0 0 8px;
+    min-height: 0;
+    height: 8px;
+}
+.html-body a {
+    color: #0a7ea4;
+    text-decoration: underline;
+}
+`;
+
+function ensureHtmlBodyStyles() {
+    if (typeof document === "undefined") return;
+    if (document.getElementById(HTML_BODY_STYLE_ID)) return;
+
+    const style = document.createElement("style");
+    style.id = HTML_BODY_STYLE_ID;
+    style.textContent = HTML_BODY_CSS;
+    document.head.appendChild(style);
+}
 
 function looksLikeHtml(value: string) {
     return /<[a-z][\s\S]*>/i.test(value);
@@ -33,11 +68,7 @@ function px(value: unknown) {
 }
 
 function toWebTextStyle(style?: StyleProp<TextStyle>): CSSProperties {
-    if (!style || typeof style !== "object" || Array.isArray(style)) {
-        return {};
-    }
-
-    const src = style as TextStyle;
+    const src = StyleSheet.flatten(style) ?? {};
     const out: CSSProperties = {};
 
     const fontSize = px(src.fontSize);
@@ -69,39 +100,22 @@ export function HtmlBody({ html, style }: HtmlBodyProps) {
     const source = html?.trim() ?? "";
     const markup = looksLikeHtml(source) ? source : linkifyPlainText(source);
 
+    useEffect(() => {
+        ensureHtmlBodyStyles();
+    }, []);
+
+    // Return a single DOM node so React Native Web Views never receive
+    // raw <style> text (CSS selectors like ".html-body" become illegal text nodes).
     return (
-        <>
-            <style>{`
-                .html-body ul,
-                .html-body ol {
-                    margin: 8px 0;
-                    padding-left: 24px;
-                }
-                .html-body p,
-                .html-body div {
-                    margin: 0 0 6px;
-                }
-                .html-body p:empty,
-                .html-body div:empty {
-                    margin: 0 0 8px;
-                    min-height: 0;
-                    height: 8px;
-                }
-                .html-body a {
-                    color: #0a7ea4;
-                    text-decoration: underline;
-                }
-            `}</style>
-            <div
-                className="html-body"
-                style={{
-                    fontFamily: Fonts.sans,
-                    fontSize: 16,
-                    lineHeight: 1.5,
-                    ...toWebTextStyle(style),
-                }}
-                dangerouslySetInnerHTML={{ __html: markup }}
-            />
-        </>
+        <div
+            className="html-body"
+            style={{
+                fontFamily: Fonts.sans,
+                fontSize: 16,
+                lineHeight: 1.5,
+                ...toWebTextStyle(style),
+            }}
+            dangerouslySetInnerHTML={{ __html: markup }}
+        />
     );
 }
