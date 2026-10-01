@@ -19,7 +19,10 @@
     "production": {
       "ios": {
         "ascAppId": "6805344755",
-        "appleTeamId": "T74D63T98W"
+        "appleTeamId": "T74D63T98W",
+        "ascApiKeyPath": "/Users/tony/Civicvoice/AuthKey_P44F989J3F.p8",
+        "ascApiKeyId": "P44F989J3F",
+        "ascApiKeyIssuerId": "0a0abef8-9429-44ae-8e7e-de542c62960b"
       }
     }
   }
